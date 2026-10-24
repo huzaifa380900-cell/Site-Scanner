@@ -1,0 +1,19 @@
+{
+  "name": "site-scanner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site Scanner — Website Analysis & Intelligence",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,cyan \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install",
+    "build": "npm --prefix client run build",
+    "test": "npm --prefix server test",
+    "test:client": "npm --prefix client test",
+    "test:all": "npm --prefix server test && npm --prefix client test",
+    "start": "npm --prefix server start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

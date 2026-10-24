@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply min-h-screen bg-[#070d19] text-slate-200 antialiased;
+    background-image:
+      radial-gradient(60rem 30rem at 12% -12%, rgba(34, 211, 238, 0.09), transparent 62%),
+      radial-gradient(48rem 26rem at 92% -6%, rgba(56, 189, 248, 0.06), transparent 58%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: rgba(34, 211, 238, 0.28);
+    color: #f8fafc;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgba(34, 211, 238, 0.75);
+    outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #070d19;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #1e2c4a;
+    border-radius: 9999px;
+    border: 2px solid #070d19;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-white/[0.07] bg-[#0b1220]/90 shadow-card;
+  }
+
+  .panel-head {
+    @apply flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-5 py-4 sm:px-6;
+  }
+
+  .panel-body {
+    @apply p-5 sm:p-6;
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[11px] text-slate-300;
+  }
+
+  .code-block {
+    @apply max-h-56 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-white/[0.06] bg-[#070d19] p-3 font-mono text-[12px] leading-relaxed text-slate-300;
+  }
+
+  .linkish {
+    @apply text-cyan-300 underline decoration-cyan-400/30 underline-offset-2 transition-colors hover:decoration-cyan-300;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}

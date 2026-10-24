@@ -1,0 +1,26 @@
+{
+  "name": "site-scanner-client",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site Scanner frontend — Vue 3 website analysis dashboard",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "daisyui": "^4.12.24",
+    "lucide-vue-next": "^0.469.0",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.0.7",
+    "vitest": "^3.0.5"
+  }
+}
