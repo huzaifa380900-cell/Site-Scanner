@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "concurrently -n server,client -c blue,cyan \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
     "install:all": "npm install && npm --prefix server install && npm --prefix client install",
-    "build": "npm --prefix client install && npm --prefix client run build && npm --prefix server install --omit=dev",
+    "build": "npm --prefix client install --include=dev && npm --prefix client run build && npm --prefix server install --omit=dev",
     "test": "npm --prefix server test",
     "test:client": "npm --prefix client test",
     "test:all": "npm --prefix server test && npm --prefix client test",
