@@ -5,7 +5,7 @@ vi.mock('../src/security/dns.js', () => ({
   resolveAll: vi.fn(),
 }))
 
-import { validateTargetUrl, assertPublicAddress } from '../src/security/ssrfProtection.js'
+import { validateTargetUrl, assertPublicAddress, redactUrlForLog } from '../src/security/ssrfProtection.js'
 import { createPinnedLookup } from '../src/security/pinnedLookup.js'
 import { fetchPage } from '../src/security/safeHttpClient.js'
 
@@ -77,6 +77,17 @@ describe('SSRF policy — URL validation', () => {
     resolveAll.mockResolvedValue(PUBLIC_V6)
     const result = await validateTargetUrl('https://example.com')
     expect(result.addresses).toEqual(PUBLIC_V6)
+  })
+})
+
+describe('SSRF policy — URL redaction', () => {
+  it('removes query values and bounds logged URLs to the report schema limit', () => {
+    const redacted = redactUrlForLog(`https://example.com/${'a'.repeat(3000)}?token=secret`)
+
+    expect(redacted).toHaveLength(2048)
+    expect(redacted).toMatch(/^https:\/\/example\.com\//)
+    expect(redacted.endsWith('...')).toBe(true)
+    expect(redacted).not.toContain('secret')
   })
 })
 

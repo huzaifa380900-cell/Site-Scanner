@@ -3,14 +3,10 @@ import { api, ApiError } from '../services/api.js'
 import { sanitizeFilename } from '../utils/formatters.js'
 
 /**
- * Single source of truth for scanning, history and health state.
+ * Single source of truth for scanning and history state.
  * Nothing is marked successful until the API returns a persisted report.
  */
 export function useScanner() {
-  const health = ref(null)
-  const healthLoading = ref(true)
-  const healthError = ref(false)
-
   const history = ref([])
   const historyLoading = ref(false)
   const historyError = ref(null)
@@ -23,23 +19,9 @@ export function useScanner() {
   const scanElapsed = ref(0)
   const lastScanUrl = ref('')
 
-  let healthTimer = null
   let elapsedTimer = null
 
   const hasReport = computed(() => Boolean(selectedReport.value))
-
-  async function refreshHealth() {
-    healthLoading.value = true
-    try {
-      health.value = await api.health()
-      healthError.value = false
-    } catch {
-      health.value = null
-      healthError.value = true
-    } finally {
-      healthLoading.value = false
-    }
-  }
 
   async function refreshHistory({ silent = false } = {}) {
     if (!silent) historyLoading.value = true
@@ -132,20 +114,14 @@ export function useScanner() {
   }
 
   onMounted(() => {
-    refreshHealth()
     refreshHistory({ silent: true })
-    healthTimer = setInterval(refreshHealth, 30000)
   })
 
   onUnmounted(() => {
-    clearInterval(healthTimer)
     clearInterval(elapsedTimer)
   })
 
   return {
-    health,
-    healthLoading,
-    healthError,
     history,
     historyLoading,
     historyError,
@@ -156,7 +132,6 @@ export function useScanner() {
     scanElapsed,
     lastScanUrl,
     hasReport,
-    refreshHealth,
     refreshHistory,
     runScan,
     openReport,

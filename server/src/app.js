@@ -35,7 +35,10 @@ export function createApp() {
       origin(origin, callback) {
         // Non-browser clients (curl, server-to-server) send no Origin.
         if (!origin) return callback(null, true)
-        if (config.clientOrigins.includes(origin)) return callback(null, true)
+        // In same-domain or serverless environments, allow same origin or configured origins
+        if (config.clientOrigins.includes('*') || config.clientOrigins.includes(origin)) return callback(null, true)
+        // If clientOrigins includes a wildcard or origin matches Vercel deployment URL
+        if (process.env.VERCEL && origin.endsWith('.vercel.app')) return callback(null, true)
         return callback(new AppError('CORS_NOT_ALLOWED', 'This origin is not allowed to call the API.', { statusCode: 403 }))
       },
       methods: ['GET', 'POST', 'OPTIONS'],

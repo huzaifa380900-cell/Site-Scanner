@@ -9,6 +9,7 @@
 
   html {
     @apply scroll-smooth;
+    overflow-x: clip;
   }
 
   body {
@@ -18,6 +19,7 @@
       radial-gradient(48rem 26rem at 92% -6%, rgba(56, 189, 248, 0.06), transparent 58%);
     background-repeat: no-repeat;
     background-attachment: fixed;
+    overflow-x: clip;
   }
 
   ::selection {
@@ -30,19 +32,15 @@
     outline-offset: 2px;
   }
 
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
-  ::-webkit-scrollbar-track {
-    background: #070d19;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #1e2c4a;
-    border-radius: 9999px;
-    border: 2px solid #070d19;
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 }
 
@@ -77,5 +75,119 @@
 
   .tabular {
     font-variant-numeric: tabular-nums;
+  }
+}
+
+
+/* Premium Design System Styles */
+@layer components {
+  /* Premium Cards */
+  .premium-card {
+    @apply rounded-2xl border border-white/[0.1] bg-gradient-to-br from-gray-900/50 to-gray-800/30 backdrop-blur-sm shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-cyan-500/30;
+  }
+
+  /* Premium Buttons */
+  .premium-button {
+    @apply relative overflow-hidden rounded-xl font-semibold text-white transition-all duration-300;
+  }
+
+  .premium-button-outline {
+    @apply border-2 border-white/10 rounded-xl font-semibold text-gray-300 transition-all duration-300 hover:border-white/20 hover:text-white hover:bg-white/5;
+  }
+
+  /* Premium Sections */
+  .premium-section {
+    @apply py-16 lg:py-24;
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent;
+  }
+
+  /* Glass Effect */
+  .glass-effect {
+    @apply backdrop-blur-xl bg-white/10 border border-white/20;
+  }
+
+  /* Animated Background */
+  .animated-bg {
+    background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #1e293b);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+  }
+
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Floating Animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .floating {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Shimmer Effect */
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+}
+
+/* Responsive Design Utilities */
+@layer utilities {
+  .container {
+    @apply mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-12 md:py-16 lg:py-24;
+  }
+
+  /* Mobile optimization */
+  @media (max-width: 640px) {
+    .mobile-optimized {
+      @apply px-4;
+    }
+
+    .mobile-stack {
+      @apply flex-col space-y-4;
+    }
+  }
+
+  /* Touch-friendly buttons for mobile */
+  .touch-friendly {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .dark-optimized {
+    @apply bg-gray-900 text-gray-100;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

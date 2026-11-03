@@ -399,7 +399,8 @@ export function createRequestGuard({ allowedPorts = config.allowedPorts, ttlMs =
 export function redactUrlForLog(rawUrl) {
   try {
     const url = new URL(String(rawUrl))
-    return `${url.protocol}//${url.host}${url.pathname}`
+    const redactedUrl = `${url.protocol}//${url.host}${url.pathname}`
+    return redactedUrl.length > 2048 ? `${redactedUrl.slice(0, 2045)}...` : redactedUrl
   } catch {
     return '[unparseable-url]'
   }

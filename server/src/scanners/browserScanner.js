@@ -1,4 +1,6 @@
-import { chromium } from 'playwright'
+import { chromium as playwright } from 'playwright-core'
+import chromium from '@sparticuz/chromium'
+import fs from 'node:fs'
 import { config } from '../config/env.js'
 import { createBrowserRequestHandler } from '../security/browserRequestHandler.js'
 import { startEgressProxy } from '../security/egressProxy.js'
@@ -18,6 +20,9 @@ import { pushLimited } from '../utils/scanLimits.js'
  * WebSockets and protocol upgrades are blocked during scans. Downloads,
  * popups and service workers are disabled; no existing browser profile,
  * cookies or credentials are used.
+ *
+ * Compatible with Vercel Serverless (using @sparticuz/chromium + playwright-core)
+ * and local development (auto-detects local Chrome/Edge or PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH).
  */
 
 function resourceScope(url, targetUrl) {
@@ -38,12 +43,116 @@ function sanitizeFailureText(text) {
 
 function safeBrowserEnv() {
   // Chromium must not inherit application secrets such as MONGODB_URI.
-  const allow = ['PATH', 'SystemRoot', 'SYSTEMROOT', 'TEMP', 'TMP', 'USERPROFILE', 'LOCALAPPDATA', 'APPDATA', 'HOME', 'LANG', 'LC_ALL']
+  const allow = [
+    'PATH',
+    'SystemRoot',
+    'SYSTEMROOT',
+    'TEMP',
+    'TMP',
+    'USERPROFILE',
+    'LOCALAPPDATA',
+    'APPDATA',
+    'HOME',
+    'LANG',
+    'LC_ALL',
+    'LD_LIBRARY_PATH',
+    'FONTCONFIG_PATH',
+    'AWS_EXECUTION_ENV',
+    'AWS_LAMBDA_JS_RUNTIME',
+    'VERCEL',
+    'VERCEL_ENV',
+  ]
   const env = {}
   for (const key of allow) {
     if (process.env[key]) env[key] = process.env[key]
   }
   return env
+}
+
+/**
+ * Resolve the appropriate Chromium executable path and launch arguments.
+ * Supports Vercel Linux Serverless environments (@sparticuz/chromium) and
+ * local development environments (Windows, macOS, Linux).
+ */
+async function resolveChromiumConfig(proxyUrl) {
+  const isVercelOrLambda = Boolean(
+    process.env.VERCEL ||
+    process.env.AWS_LAMBDA_FUNCTION_VERSION ||
+    process.env.AWS_EXECUTION_ENV ||
+    process.env.LAMBDA_TASK_ROOT ||
+    (process.platform === 'linux' && !process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH)
+  )
+
+  let executablePath = null
+  let extraArgs = []
+
+  // 1. Explicit override if provided
+  if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH) {
+    executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+  } else if (isVercelOrLambda) {
+    // In Vercel / AWS Lambda Linux environment, use @sparticuz/chromium
+    chromium.setGraphicsMode = false
+    executablePath = await chromium.executablePath()
+    extraArgs = chromium.args || []
+  } else {
+    // Local development fallback: detect installed Chrome or Edge
+    const localCandidates = [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+      'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+      '/usr/bin/google-chrome',
+      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser',
+    ]
+
+    for (const candidate of localCandidates) {
+      if (fs.existsSync(candidate)) {
+        executablePath = candidate
+        break
+      }
+    }
+
+    if (!executablePath) {
+      // Try resolving through @sparticuz/chromium as fallback
+      try {
+        executablePath = await chromium.executablePath()
+      } catch {
+        executablePath = null
+      }
+    }
+  }
+
+  const baseArgs = [
+    `--proxy-server=${proxyUrl}`,
+    // Force even loopback destinations through the enforcing proxy.
+    '--proxy-bypass-list=<-loopback>',
+    '--disable-quic',
+    '--disable-background-networking',
+    '--disable-component-update',
+    '--disable-default-apps',
+    '--disable-sync',
+    '--disable-domain-reliability',
+    '--disable-extensions',
+    '--disable-dev-shm-usage',
+    '--disable-features=Translate,BackForwardCache,MediaRouter,OptimizationHints',
+    '--metrics-recording-only',
+    '--no-first-run',
+    '--no-default-browser-check',
+    '--no-pings',
+    '--safebrowsing-disable-auto-update',
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-gpu',
+    '--single-process',
+  ]
+
+  // Deduplicate arguments
+  const combinedArgs = Array.from(new Set([...baseArgs, ...extraArgs]))
+
+  return { executablePath, args: combinedArgs }
 }
 
 /**
@@ -106,32 +215,18 @@ export async function scanWithBrowser(targetUrl, options = {}) {
   try {
     proxy = await startEgressProxy({ onBlocked: (entry) => result.blockedRequests.push({ url: `https://${entry.hostname}/`, code: entry.code }) })
 
-    browser = await chromium.launch({
+    const { executablePath, args } = await resolveChromiumConfig(proxy.url)
+
+    if (!executablePath) {
+      throw new Error("Executable doesn't exist: No compatible Chromium binary could be found.")
+    }
+
+    browser = await playwright.launch({
       headless: true,
       timeout: 20000,
       env: safeBrowserEnv(),
-      ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-        ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
-        : {}),
-      args: [
-        `--proxy-server=${proxy.url}`,
-        // Force even loopback destinations through the enforcing proxy.
-        '--proxy-bypass-list=<-loopback>',
-        '--disable-quic',
-        '--disable-background-networking',
-        '--disable-component-update',
-        '--disable-default-apps',
-        '--disable-sync',
-        '--disable-domain-reliability',
-        '--disable-extensions',
-        '--disable-dev-shm-usage',
-        '--disable-features=Translate,BackForwardCache,MediaRouter,OptimizationHints',
-        '--metrics-recording-only',
-        '--no-first-run',
-        '--no-default-browser-check',
-        '--no-pings',
-        '--safebrowsing-disable-auto-update',
-      ],
+      executablePath,
+      args,
     })
 
     try {
@@ -199,7 +294,7 @@ export async function scanWithBrowser(targetUrl, options = {}) {
       const location = message.location()
       const item = {
         message: message.text().slice(0, 500),
-        url: location?.url || '',
+        url: location?.url ? redactUrlForLog(location.url) : '',
         scope: resourceScope(location?.url || targetUrl, targetUrl),
         blockedByPolicy: blockedKeys.has(location?.url || ''),
       }
@@ -211,7 +306,7 @@ export async function scanWithBrowser(targetUrl, options = {}) {
     page.on('pageerror', (error) => {
       const item = {
         message: String(error?.message || error).slice(0, 500),
-        url: page.url() || targetUrl,
+        url: redactUrlForLog(page.url() || targetUrl),
         scope: 'same-origin',
       }
       if (!result.pageErrors.some((existing) => existing.message === item.message)) {
