@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import { AlertTriangle, ChevronRight, Database, History, Lock, RefreshCw, Trash2 } from 'lucide-vue-next'
 import { formatDate, statusCodeTone } from '../utils/formatters.js'
 
@@ -13,15 +14,31 @@ defineProps({
 })
 
 const emit = defineEmits(['refresh', 'select', 'delete'])
+const deleteDialog = ref(null)
+const deleteCandidate = ref(null)
 
 function statusClass(status) {
   return status === 'completed' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
 }
 
-function confirmDelete(item) {
-  if (window.confirm(`Delete the saved scan for ${item.hostname}? This cannot be undone.`)) {
-    emit('delete', item.id)
-  }
+function promptDelete(item) {
+  deleteCandidate.value = item
+  deleteDialog.value?.showModal()
+}
+
+function closeDeleteDialog() {
+  if (deleteDialog.value?.open) deleteDialog.value.close()
+  deleteCandidate.value = null
+}
+
+function deleteSelectedScan() {
+  if (!deleteCandidate.value) return
+  emit('delete', deleteCandidate.value.id)
+  closeDeleteDialog()
+}
+
+function closeOnBackdrop(event) {
+  if (event.target === deleteDialog.value) closeDeleteDialog()
 }
 </script>
 <template>
@@ -168,7 +185,7 @@ function confirmDelete(item) {
           :disabled="disabled || Boolean(deletingId)"
           :aria-label="`Delete scan for ${item.hostname}`"
           :title="deletingId === item.id ? 'Deleting scan' : 'Delete scan'"
-          @click="confirmDelete(item)"
+          @click="promptDelete(item)"
         >
           <Trash2 :size="14" :class="deletingId === item.id ? 'animate-pulse' : ''" />
         </button>
@@ -194,9 +211,82 @@ function confirmDelete(item) {
       <span class="tabular text-right">12 saved · older auto-delete</span>
     </div>
   </section>
+
+  <Teleport to="body">
+    <dialog
+      ref="deleteDialog"
+      class="delete-dialog m-auto w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-2xl border border-white/10 bg-[#0b1220] p-0 text-slate-200 shadow-2xl backdrop:bg-[#020617]/75 backdrop:backdrop-blur-sm"
+      aria-labelledby="delete-dialog-title"
+      aria-describedby="delete-dialog-description"
+      @cancel.prevent="closeDeleteDialog"
+      @click="closeOnBackdrop"
+    >
+      <div class="relative overflow-hidden p-5 sm:p-6">
+        <div class="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-rose-500/10 blur-3xl" />
+        <div class="relative">
+          <div class="flex items-start gap-4">
+            <div class="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-rose-400/20 bg-rose-500/10 text-rose-300">
+              <AlertTriangle :size="21" />
+            </div>
+            <div class="min-w-0 pt-0.5">
+              <h2 id="delete-dialog-title" class="text-base font-semibold tracking-tight text-white sm:text-lg">
+                Delete this scan?
+              </h2>
+              <p class="mt-1 break-all text-sm font-medium text-cyan-200">
+                {{ deleteCandidate?.hostname }}
+              </p>
+            </div>
+          </div>
+
+          <p id="delete-dialog-description" class="mt-4 text-sm leading-relaxed text-slate-400">
+            This report will be permanently removed from your saved history. This action cannot be undone.
+          </p>
+
+          <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              autofocus
+              class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm font-medium text-slate-200 transition-colors hover:bg-white/[0.08] focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400"
+              @click="closeDeleteDialog"
+            >
+              Keep scan
+            </button>
+            <button
+              type="button"
+              class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-400/20 bg-rose-500/15 px-4 text-sm font-semibold text-rose-200 transition-colors hover:border-rose-400/35 hover:bg-rose-500/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-rose-300"
+              @click="deleteSelectedScan"
+            >
+              <Trash2 :size="15" />
+              Delete scan
+            </button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+  </Teleport>
 </template>
 
 <style scoped>
+.delete-dialog[open] {
+  animation: dialogEnter 160ms ease-out;
+}
+
+.delete-dialog::backdrop {
+  background: rgb(2 6 23 / 75%);
+  backdrop-filter: blur(5px);
+}
+
+@keyframes dialogEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* Skeleton shimmer sweep */
 .skeleton-shimmer {
   background: linear-gradient(
@@ -211,5 +301,11 @@ function confirmDelete(item) {
 @keyframes skeletonSweep {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .delete-dialog[open] {
+    animation: none;
+  }
 }
 </style>
