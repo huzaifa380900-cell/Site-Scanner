@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import request from 'supertest'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -31,7 +32,16 @@ vi.mock('../src/models/ScanReport.js', () => ({
   },
 }))
 
-const ENV_KEYS = ['VERCEL', 'VERCEL_ENV', 'TRUST_PROXY', 'AWS_EXECUTION_ENV', 'AWS_LAMBDA_JS_RUNTIME']
+const ENV_KEYS = [
+  'VERCEL',
+  'VERCEL_ENV',
+  'RENDER',
+  'RENDER_SERVICE_ID',
+  'TRUST_PROXY',
+  'CLIENT_ORIGIN',
+  'AWS_EXECUTION_ENV',
+  'AWS_LAMBDA_JS_RUNTIME',
+]
 
 const originalEnv = {}
 for (const key of ENV_KEYS) originalEnv[key] = process.env[key]
@@ -50,6 +60,17 @@ afterEach(() => {
 })
 
 describe('trust proxy configuration', () => {
+  it('trusts exactly one Render proxy hop by default', async () => {
+    resetEnv()
+    process.env.RENDER = 'true'
+    vi.resetModules()
+
+    const { createApp } = await import('../src/app.js')
+    const app = createApp()
+
+    expect(app.get('trust proxy')).toBe(1)
+  })
+
   it(
     'trusts exactly one proxy hop on Vercel without any environment variable',
     async () => {
@@ -111,6 +132,24 @@ describe('trust proxy configuration', () => {
   )
 })
 
+describe('Render production CORS configuration', () => {
+  it('allows the exact Vercel frontend origin configured in CLIENT_ORIGIN', async () => {
+    resetEnv()
+    process.env.RENDER = 'true'
+    process.env.CLIENT_ORIGIN = 'https://site-scanner.vercel.app'
+    vi.resetModules()
+
+    const { createApp } = await import('../src/app.js')
+    const response = await request(createApp())
+      .options('/api/health')
+      .set('Origin', 'https://site-scanner.vercel.app')
+      .set('Access-Control-Request-Method', 'GET')
+
+    expect(response.status).toBe(204)
+    expect(response.headers['access-control-allow-origin']).toBe('https://site-scanner.vercel.app')
+  })
+})
+
 describe('serverless Chromium runtime detection', () => {
   it('detects the Vercel runtime', async () => {
     resetEnv()
@@ -121,6 +160,30 @@ describe('serverless Chromium runtime detection', () => {
 
     expect(isServerlessRuntime()).toBe(true)
     expect(describeRuntime().host).toBe('vercel')
+  })
+
+  it('uses the Playwright-installed Chromium on Render instead of Sparticuz', async () => {
+    resetEnv()
+    process.env.RENDER = 'true'
+    vi.resetModules()
+
+    const executablePath = path.join(os.tmpdir(), `render-chromium-${process.pid}`)
+    fs.writeFileSync(executablePath, '')
+    const { chromium } = await import('playwright-core')
+    const executablePathSpy = vi.spyOn(chromium, 'executablePath').mockReturnValue(executablePath)
+
+    try {
+      const { resolveChromiumConfig } = await import('../src/scanners/browserScanner.js')
+      const resolved = await resolveChromiumConfig('http://127.0.0.1:12345')
+
+      expect(resolved.executablePath).toBe(executablePath)
+      expect(resolved.diagnostics.source).toBe('playwright-installed')
+      expect(resolved.diagnostics.binaryPresent).toBe(true)
+      expect(executablePathSpy).toHaveBeenCalledOnce()
+    } finally {
+      executablePathSpy.mockRestore()
+      fs.rmSync(executablePath, { force: true })
+    }
   })
 
   it('does not treat a local machine as serverless', async () => {

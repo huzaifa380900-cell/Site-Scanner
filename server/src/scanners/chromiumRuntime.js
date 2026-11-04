@@ -48,10 +48,16 @@ export function isServerlessRuntime() {
   )
 }
 
+export function isRenderRuntime() {
+  return Boolean(process.env.RENDER || process.env.RENDER_SERVICE_ID)
+}
+
 /** Human readable runtime description used in (secret-free) log lines. */
 export function describeRuntime() {
   const host = process.env.VERCEL
     ? 'vercel'
+    : isRenderRuntime()
+      ? 'render'
     : process.env.AWS_EXECUTION_ENV || process.env.AWS_LAMBDA_JS_RUNTIME
       ? 'aws-lambda'
       : 'local'

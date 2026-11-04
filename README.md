@@ -445,6 +445,42 @@ rate limiter. The effective mode is logged at startup:
 
 ---
 
+## Deploying the API on Render with Docker
+
+Create a Render **Web Service** from this repository and use these settings:
+
+| Setting | Value |
+| --- | --- |
+| Language | Docker |
+| Root Directory | `server` |
+| Dockerfile Path | `./Dockerfile` |
+| Docker Command | Leave blank to use the image command |
+| Health Check Path | `/api/health` |
+| Instance size | At least 2 GB RAM for reliable Chromium scans |
+
+The Docker image pins the official Playwright image to `1.49.1`, matching
+`playwright-core` in `server/package-lock.json`. Render supplies `PORT` (default
+`10000`); the server listens on that port and `0.0.0.0`. Render's `RENDER=true`
+marker makes browser scans use the image-installed Playwright Chromium instead
+of extracting the Vercel/Sparticuz runtime.
+
+Set these variables in the Render service dashboard. Never add their values to
+the Dockerfile or repository:
+
+| Variable | Value |
+| --- | --- |
+| `MONGODB_URI` | MongoDB Atlas connection URI |
+| `CLIENT_ORIGIN` | Exact Vercel origin, e.g. `https://site-scanner.vercel.app`; comma-separate any other allowed origins |
+| `BROWSER_SCAN_ENABLED` | `true` |
+| `TRUST_PROXY` | `true` (Render is detected automatically; this makes the one-hop proxy setting explicit) |
+
+On the Vercel frontend project, set the build-time variable
+`VITE_API_BASE_URL=https://<render-service>.onrender.com/api` and redeploy the
+frontend. The origin in `CLIENT_ORIGIN` must match the browser's Vercel origin
+exactly, without a trailing slash. In MongoDB Atlas, allow the Render service's
+outbound IP ranges for its selected region, or use static egress and allow that
+address; keep Atlas authentication enabled.
+
 ## API documentation
 
 Base URL: `http://localhost:5000/api`

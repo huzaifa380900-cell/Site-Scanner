@@ -4,8 +4,8 @@ import { connectDatabase, disconnectDatabase } from './config/database.js'
 
 const app = createApp()
 
-const server = app.listen(config.port, () => {
-  console.log(`[server] Site Scanner API listening on http://localhost:${config.port}`)
+const server = app.listen(config.port, '0.0.0.0', () => {
+  console.log(`[server] Site Scanner API listening on 0.0.0.0:${config.port}`)
   console.log(`[server] Environment: ${config.nodeEnv}`)
   console.log(`[server] Allowed client origins: ${config.clientOrigins.join(', ') || '(none)'}`)
   console.log(`[server] Browser checks: ${config.browserScanEnabled ? 'enabled' : 'disabled'}`)

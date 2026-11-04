@@ -5,7 +5,7 @@ import { createBrowserRequestHandler } from '../security/browserRequestHandler.j
 import { startEgressProxy } from '../security/egressProxy.js'
 import { createRequestGuard, redactUrlForLog, validateTargetUrl } from '../security/ssrfProtection.js'
 import { pushLimited } from '../utils/scanLimits.js'
-import { describeRuntime, isServerlessRuntime, resolveServerlessChromium } from './chromiumRuntime.js'
+import { describeRuntime, isRenderRuntime, isServerlessRuntime, resolveServerlessChromium } from './chromiumRuntime.js'
 
 /**
  * Headless Chromium analysis with two independent SSRF enforcement layers:
@@ -126,14 +126,13 @@ function logBrowserEvent(level, message, payload) {
  * Supports Vercel/Linux Serverless environments (@sparticuz/chromium) and
  * local development environments (Windows, macOS, Linux).
  */
-async function resolveChromiumConfig(proxyUrl) {
+export async function resolveChromiumConfig(proxyUrl) {
   const isVercelOrLambda = Boolean(
     process.env.VERCEL ||
       process.env.AWS_LAMBDA_FUNCTION_VERSION ||
       process.env.AWS_EXECUTION_ENV ||
       process.env.AWS_LAMBDA_JS_RUNTIME ||
-      process.env.LAMBDA_TASK_ROOT ||
-      (process.platform === 'linux' && !process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH)
+      process.env.LAMBDA_TASK_ROOT
   )
 
   let executablePath = null
@@ -144,6 +143,12 @@ async function resolveChromiumConfig(proxyUrl) {
   if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH) {
     executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
     diagnostics = { source: 'explicit-override' }
+  } else if (isRenderRuntime()) {
+    executablePath = playwright.executablePath()
+    diagnostics = { source: 'playwright-installed', binaryPresent: fs.existsSync(executablePath) }
+    if (!diagnostics.binaryPresent) {
+      throw new Error('Executable does not exist: Playwright Chromium is not installed in this runtime.')
+    }
   } else if (isVercelOrLambda) {
     // Serverless: use @sparticuz/chromium. The runtime bootstrap inflates the
     // Chromium binary and the shared libraries that Amazon Linux 2023 does
