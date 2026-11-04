@@ -1,11 +1,11 @@
 import { chromium as playwright } from 'playwright-core'
-import chromium from '@sparticuz/chromium'
 import fs from 'node:fs'
 import { config } from '../config/env.js'
 import { createBrowserRequestHandler } from '../security/browserRequestHandler.js'
 import { startEgressProxy } from '../security/egressProxy.js'
 import { createRequestGuard, redactUrlForLog, validateTargetUrl } from '../security/ssrfProtection.js'
 import { pushLimited } from '../utils/scanLimits.js'
+import { describeRuntime, isServerlessRuntime, resolveServerlessChromium } from './chromiumRuntime.js'
 
 /**
  * Headless Chromium analysis with two independent SSRF enforcement layers:
@@ -49,6 +49,7 @@ function safeBrowserEnv() {
     'SYSTEMROOT',
     'TEMP',
     'TMP',
+    'TMPDIR',
     'USERPROFILE',
     'LOCALAPPDATA',
     'APPDATA',
@@ -70,30 +71,87 @@ function safeBrowserEnv() {
 }
 
 /**
+ * Flags that must never reach the browser process.
+ *
+ * - `--disable-web-security` and `--allow-running-insecure-content` weaken the
+ *   browser's own web security model. The scanner must observe the site the
+ *   same way a normal browser would.
+ * - Headless flags are controlled by Playwright itself; the Sparticuz default
+ *   (`--headless='shell'`) conflicts with it.
+ * - Graphics flags are dropped because the scanner runs with the GPU disabled.
+ */
+const BLOCKED_CHROMIUM_ARGS = new Set([
+  '--disable-web-security',
+  '--allow-running-insecure-content',
+  '--headless',
+  "--headless='shell'",
+  '--headless=shell',
+  '--headless=new',
+  '--headless=old',
+  '--use-gl=angle',
+  '--use-angle=swiftshader',
+  '--ignore-gpu-blocklist',
+  '--in-process-gpu',
+])
+
+export function filterChromiumArgs(args) {
+  return args.filter((arg) => !BLOCKED_CHROMIUM_ARGS.has(arg))
+}
+
+/**
+ * Remove absolute filesystem paths and connection strings from log output.
+ * Keeps the useful part (library names, error codes) but never leaks the
+ * deployment layout, home directories or credentials.
+ */
+function sanitizeLogText(text) {
+  return String(text || '')
+    .replace(/(mongodb(?:\+srv)?:\/\/)[^\s"']+/gi, '$1[redacted]')
+    .replace(/(\/[A-Za-z0-9._@+-]+){2,}\/?/g, '[path]/')
+    .replace(/[A-Za-z]:\\[^\s")]+/g, '[path]')
+    .replace(/\s+/g, ' ')
+    .slice(0, 700)
+}
+
+function logBrowserEvent(level, message, payload) {
+  const line = `[browser] ${message}`
+  if (level === 'error') {
+    console.error(line, JSON.stringify(payload))
+    return
+  }
+  console.log(line, JSON.stringify(payload))
+}
+
+/**
  * Resolve the appropriate Chromium executable path and launch arguments.
- * Supports Vercel Linux Serverless environments (@sparticuz/chromium) and
+ * Supports Vercel/Linux Serverless environments (@sparticuz/chromium) and
  * local development environments (Windows, macOS, Linux).
  */
 async function resolveChromiumConfig(proxyUrl) {
   const isVercelOrLambda = Boolean(
     process.env.VERCEL ||
-    process.env.AWS_LAMBDA_FUNCTION_VERSION ||
-    process.env.AWS_EXECUTION_ENV ||
-    process.env.LAMBDA_TASK_ROOT ||
-    (process.platform === 'linux' && !process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH)
+      process.env.AWS_LAMBDA_FUNCTION_VERSION ||
+      process.env.AWS_EXECUTION_ENV ||
+      process.env.AWS_LAMBDA_JS_RUNTIME ||
+      process.env.LAMBDA_TASK_ROOT ||
+      (process.platform === 'linux' && !process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH)
   )
 
   let executablePath = null
   let extraArgs = []
+  let diagnostics = { source: 'unknown' }
 
   // 1. Explicit override if provided
   if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH) {
     executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+    diagnostics = { source: 'explicit-override' }
   } else if (isVercelOrLambda) {
-    // In Vercel / AWS Lambda Linux environment, use @sparticuz/chromium
-    chromium.setGraphicsMode = false
-    executablePath = await chromium.executablePath()
-    extraArgs = chromium.args || []
+    // Serverless: use @sparticuz/chromium. The runtime bootstrap inflates the
+    // Chromium binary and the shared libraries that Amazon Linux 2023 does
+    // not provide (Vercel does not look like AWS Lambda to the package).
+    const resolved = await resolveServerlessChromium()
+    executablePath = resolved.executablePath
+    extraArgs = resolved.args
+    diagnostics = { source: 'sparticuz', ...resolved.diagnostics }
   } else {
     // Local development fallback: detect installed Chrome or Edge
     const localCandidates = [
@@ -114,14 +172,10 @@ async function resolveChromiumConfig(proxyUrl) {
         break
       }
     }
+    diagnostics = { source: 'local-browser' }
 
     if (!executablePath) {
-      // Try resolving through @sparticuz/chromium as fallback
-      try {
-        executablePath = await chromium.executablePath()
-      } catch {
-        executablePath = null
-      }
+      throw new Error('No compatible Chromium binary could be found.')
     }
   }
 
@@ -149,11 +203,12 @@ async function resolveChromiumConfig(proxyUrl) {
     '--single-process',
   ]
 
-  // Deduplicate arguments
-  const combinedArgs = Array.from(new Set([...baseArgs, ...extraArgs]))
+  // Deduplicate arguments and drop the flags that must never be used.
+  const combinedArgs = Array.from(new Set([...baseArgs, ...filterChromiumArgs(extraArgs)]))
 
-  return { executablePath, args: combinedArgs }
+  return { executablePath, args: combinedArgs, diagnostics }
 }
+
 
 /**
  * @param {string} targetUrl URL already accepted by the scan pipeline
@@ -215,19 +270,38 @@ export async function scanWithBrowser(targetUrl, options = {}) {
   try {
     proxy = await startEgressProxy({ onBlocked: (entry) => result.blockedRequests.push({ url: `https://${entry.hostname}/`, code: entry.code }) })
 
-    const { executablePath, args } = await resolveChromiumConfig(proxy.url)
+    const { executablePath, args, diagnostics } = await resolveChromiumConfig(proxy.url)
 
     if (!executablePath) {
       throw new Error("Executable doesn't exist: No compatible Chromium binary could be found.")
     }
 
-    browser = await playwright.launch({
-      headless: true,
-      timeout: 20000,
-      env: safeBrowserEnv(),
-      executablePath,
-      args,
+    logBrowserEvent('info', 'Launching Chromium', {
+      runtime: describeRuntime(),
+      serverless: isServerlessRuntime(),
+      ...diagnostics,
+      argumentCount: args.length,
     })
+
+    try {
+      browser = await playwright.launch({
+        headless: true,
+        timeout: 20000,
+        env: safeBrowserEnv(),
+        executablePath,
+        args,
+      })
+    } catch (launchError) {
+      // Log the real launch failure (sanitized) so the Vercel runtime log
+      // shows whether the binary was missing, a shared library was not found
+      // or the process exited early.
+      logBrowserEvent('error', 'Chromium launch failed', {
+        runtime: describeRuntime(),
+        ...diagnostics,
+        reason: sanitizeLogText(launchError?.message || launchError),
+      })
+      throw launchError
+    }
 
     try {
       result.browserVersion = browser.version()
@@ -382,26 +456,49 @@ export async function scanWithBrowser(targetUrl, options = {}) {
     return result
   } catch (error) {
     const message = String(error?.message || '')
+    const launchFailure = /browserType\.launch|Failed to launch the browser process|Executable doesn't exist|Protocol error|browser has disconnected/i.test(
+      message,
+    )
+
     let code = 'BROWSER_NAVIGATION_FAILED'
-    if (/Executable doesn't exist|browserType\.launch|ENOENT/i.test(message)) code = 'BROWSER_UNAVAILABLE'
-    else if (/Timeout|timeout/i.test(message)) code = 'BROWSER_TIMEOUT'
-    else if (/ERR_TUNNEL_CONNECTION_FAILED|ERR_PROXY_CONNECTION_FAILED/i.test(message)) code = 'EGRESS_PROXY_BLOCKED'
-    else if (/ERR_NAME_NOT_RESOLVED|ERR_NAME_RESOLUTION_FAILED/i.test(message)) code = 'BROWSER_DNS_FAILED'
+    if (/error while loading shared librar|cannot open shared object file|libnss3|libnspr4|libexpat/i.test(message)) {
+      code = 'BROWSER_LIBS_MISSING'
+    } else if (/Executable doesn't exist|ENOENT|does not exist/i.test(message)) {
+      code = 'BROWSER_BINARY_MISSING'
+    } else if (launchFailure && /timeout/i.test(message)) {
+      code = 'BROWSER_LAUNCH_TIMEOUT'
+    } else if (launchFailure) {
+      code = 'BROWSER_LAUNCH_FAILED'
+    } else if (/No compatible Chromium binary could be found/i.test(message)) {
+      code = 'BROWSER_UNAVAILABLE'
+    } else if (/timeout/i.test(message)) {
+      code = 'BROWSER_TIMEOUT'
+    } else if (/ERR_TUNNEL_CONNECTION_FAILED|ERR_PROXY_CONNECTION_FAILED/i.test(message)) {
+      code = 'EGRESS_PROXY_BLOCKED'
+    } else if (/ERR_NAME_NOT_RESOLVED|ERR_NAME_RESOLUTION_FAILED/i.test(message)) {
+      code = 'BROWSER_DNS_FAILED'
+    }
+
+    if (code !== 'BROWSER_LAUNCH_FAILED' && code !== 'BROWSER_LIBS_MISSING' && code !== 'BROWSER_BINARY_MISSING') {
+      logBrowserEvent('info', 'Browser stage failed', { code, reason: sanitizeLogText(message) })
+    }
+
+    const messages = {
+      BROWSER_TIMEOUT: 'The browser did not finish loading the page within the scan limit.',
+      BROWSER_UNAVAILABLE: 'The Chromium browser is not available on the server.',
+      BROWSER_BINARY_MISSING: 'The Chromium browser binary is not available on the server.',
+      BROWSER_LIBS_MISSING: 'The Chromium runtime libraries are not available on the server.',
+      BROWSER_LAUNCH_TIMEOUT: 'The Chromium browser took too long to start on the server.',
+      BROWSER_LAUNCH_FAILED: 'The Chromium browser could not be started on the server.',
+      BROWSER_DNS_FAILED: 'The browser could not resolve the website hostname.',
+      EGRESS_PROXY_BLOCKED: 'The browser request was blocked by the outbound security policy.',
+    }
 
     result.status = 'failed'
     result.error = {
       code,
       // Deliberately generic: no filesystem paths, internal addresses or stack traces.
-      message:
-        code === 'BROWSER_TIMEOUT'
-          ? 'The browser did not finish loading the page within the scan limit.'
-          : code === 'BROWSER_UNAVAILABLE'
-            ? 'The Chromium browser is not available on the server.'
-            : code === 'BROWSER_DNS_FAILED'
-              ? 'The browser could not resolve the website hostname.'
-              : code === 'EGRESS_PROXY_BLOCKED'
-                ? 'The browser request was blocked by the outbound security policy.'
-                : 'The browser could not load the page.',
+      message: messages[code] || 'The browser could not load the page.',
     }
     return result
   } finally {

@@ -148,6 +148,7 @@ SiteScanner/
 │   │   │   └── scan.routes.js
 │   │   ├── scanners/
 │   │   │   ├── browserScanner.js
+│   │   │   ├── chromiumRuntime.js
 │   │   │   ├── findingsBuilder.js
 │   │   │   ├── htmlAnalyzer.js
 │   │   │   ├── httpScanner.js
@@ -364,6 +365,83 @@ node scripts/ui-smoke.js
 ```
 
 This drives Chromium through the actual UI: empty state → blocked URL → real scan → history open → tabs → JSON download → mobile layout. Screenshots are written to `docs/screenshots/`.
+
+---
+
+## Deploying on Vercel (frontend + API in one project)
+
+The repository is deployed as a single Vercel project: the Vue build is served as
+static output and `api/index.js` runs the Express API as a serverless function.
+
+### Project settings
+
+| Setting | Value |
+| --- | --- |
+| Root Directory | `./` |
+| Framework Preset | Other |
+| Install Command | `npm install` |
+| Build Command | `npm run build` |
+| Output Directory | `client/dist` |
+| Node.js runtime | 20.x or newer |
+
+### Environment variables (Production)
+
+| Variable | Value | Purpose |
+| --- | --- | --- |
+| `MONGODB_URI` | your Atlas connection string | report persistence |
+| `NODE_ENV` | `production` | Express production mode |
+| `TRUST_PROXY` | `true` (optional) | forces `trust proxy` on; it is **enabled by default on Vercel** |
+| `CLIENT_ORIGIN` | your deployment URL | CORS allow-list |
+| `BROWSER_SCAN_ENABLED` | `true` | enables the Chromium stage |
+
+> Vercel only applies environment variables to **new** deployments. After adding or
+> changing a variable you must redeploy (Deployments → ⋯ → Redeploy) for it to reach
+> the running function.
+
+### How the Chromium runtime works on Vercel
+
+Vercel functions run on Amazon Linux 2023 but do **not** look like AWS Lambda to
+`@sparticuz/chromium`: the package only inflates its bundled shared libraries
+(`libnss3`, `libnspr4`, `libexpat`, …) when it sees `AWS_EXECUTION_ENV` /
+`AWS_LAMBDA_JS_RUNTIME`. Without them Chromium cannot start and every scan reports
+`BROWSER_UNAVAILABLE`.
+
+`server/src/scanners/chromiumRuntime.js` performs those missing steps explicitly:
+
+1. detect the serverless runtime and the Linux flavour,
+2. inflate `al2023.tar.br` into `/tmp/al2023` and export `LD_LIBRARY_PATH`,
+3. export `FONTCONFIG_PATH` (fonts) and a writable `HOME`/`TMPDIR`,
+4. resolve the Chromium binary and return the launch environment.
+
+The compressed payload itself is shipped with the function through
+`vercel.json → functions["api/index.js"].includeFiles`.
+
+### Reading the Chromium diagnostics
+
+The browser stage writes one structured line per launch to the Vercel runtime log
+(no secrets, no filesystem paths, no stack traces):
+
+```text
+[browser] Launching Chromium {"runtime":{"host":"vercel","platform":"linux",...},"libraries":"extracted","binaryPresent":true,...}
+[browser] Chromium launch failed {"reason":"...error while loading shared libraries: libnss3.so..."}
+```
+
+The second line appears only when the launch really failed and contains the
+sanitized reason, e.g. `BROWSER_LIBS_MISSING`, `BROWSER_BINARY_MISSING`,
+`BROWSER_LAUNCH_TIMEOUT` or `BROWSER_LAUNCH_FAILED`.
+
+### Express and the Vercel edge proxy
+
+Vercel always sends `X-Forwarded-For`. With Express' default `trust proxy = false`,
+`express-rate-limit` v7 rejects every request with
+`ERR_ERL_UNEXPECTED_X_FORWARDED_FOR` (HTTP 500). The API therefore trusts **exactly
+one** proxy hop (`app.set('trust proxy', 1)`) whenever it runs behind Vercel or
+Lambda, and never `true`, so a spoofed `X-Forwarded-For` chain cannot bypass the
+rate limiter. The effective mode is logged at startup:
+
+```text
+[app] trust proxy: enabled (1 hop)
+```
 
 ---
 
@@ -637,6 +715,8 @@ Result: **16 tests passed** (URL UX validation, formatters, score tones, filenam
 
 ### `BROWSER_UNAVAILABLE` / Playwright launch fails
 
+Locally:
+
 ```powershell
 cd server
 npx playwright install chromium
@@ -648,7 +728,22 @@ On Linux also install OS dependencies:
 npx playwright install --with-deps chromium
 ```
 
+On Vercel no browser has to be installed: the runtime bootstrap in
+`server/src/scanners/chromiumRuntime.js` inflates the bundled Chromium payload and
+its Amazon Linux 2023 shared libraries. Check the Vercel runtime log for the
+`[browser] Chromium launch failed` line — it states the real reason
+(missing binary, missing `libnss3.so`, launch timeout, …) while the API response
+stays generic on purpose.
+
 If Chromium must live elsewhere, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` and pass it to `chromium.launch({ executablePath })` in `browserScanner.js` (the variable is reserved in `.env.example`).
+
+### `ERR_ERL_UNEXPECTED_X_FORWARDED_FOR` in the Vercel runtime log
+
+Express is running behind Vercel's edge proxy, which always sends
+`X-Forwarded-For`. `trust proxy` must be enabled for one hop; the API does this
+automatically on Vercel/Lambda and prints `[app] trust proxy: enabled (1 hop)` at
+startup. Set `TRUST_PROXY=false` only if the API is deployed without a proxy.
+Remember that a changed environment variable requires a **new deployment**.
 
 ### Port already in use
 

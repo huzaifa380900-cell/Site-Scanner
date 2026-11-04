@@ -75,7 +75,11 @@ const errorHint = computed(() => {
     case 'TARGET_UNREACHABLE':
       return 'The website refused the connection or could not be reached from the scanner.'
     case 'BROWSER_UNAVAILABLE':
-      return 'Install Chromium with "npx playwright install chromium" in the server directory.'
+    case 'BROWSER_BINARY_MISSING':
+    case 'BROWSER_LIBS_MISSING':
+    case 'BROWSER_LAUNCH_FAILED':
+    case 'BROWSER_LAUNCH_TIMEOUT':
+      return 'The server could not start its headless Chromium runtime. Check the Vercel runtime logs for the [browser] Chromium launch failed entry.'
     default:
       return null
   }

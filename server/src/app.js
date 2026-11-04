@@ -12,10 +12,20 @@ export function createApp() {
   const app = express()
 
   app.disable('x-powered-by')
-  if (process.env.TRUST_PROXY === 'true') {
-    // Only enable behind a known reverse proxy you control.
-    app.set('trust proxy', 1)
-  }
+
+  // Vercel serverless functions always run behind Vercel's edge proxy, which
+  // sets `X-Forwarded-For`. When `trust proxy` is disabled (Express default),
+  // express-rate-limit v7 rejects every request with
+  // ERR_ERL_UNEXPECTED_X_FORWARDED_FOR and the API answers with a 500.
+  //
+  // Exactly one hop is trusted (never `true`), so the client address is taken
+  // from the entry that Vercel itself appended. A caller cannot spoof its IP
+  // by sending its own X-Forwarded-For chain.
+  //
+  // `config.trustProxy` defaults to enabled on Vercel/Lambda and can be
+  // overridden with TRUST_PROXY=true|false.
+  app.set('trust proxy', config.trustProxy ? 1 : false)
+  console.log(`[app] trust proxy: ${config.trustProxy ? 'enabled (1 hop)' : 'disabled'}`)
 
   app.use(
     helmet({

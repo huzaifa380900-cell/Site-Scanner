@@ -42,6 +42,14 @@ export const config = {
     .map((origin) => origin.trim())
     .filter(Boolean),
 
+  // Behind a reverse proxy (Vercel, AWS Lambda) the real client address is
+  // only available in X-Forwarded-For. Trusting exactly one proxy hop is
+  // required by express-rate-limit and is safe here.
+  trustProxy: boolFromEnv(
+    'TRUST_PROXY',
+    Boolean(process.env.VERCEL || process.env.AWS_EXECUTION_ENV || process.env.AWS_LAMBDA_JS_RUNTIME),
+  ),
+
   appVersion: process.env.APP_VERSION || '1.0.0',
   scanTimeoutMs: intFromEnv('SCAN_TIMEOUT_MS', 30000, { min: 3000, max: 120000 }),
   navigationTimeoutMs: intFromEnv('NAVIGATION_TIMEOUT_MS', 20000, { min: 3000, max: 90000 }),
