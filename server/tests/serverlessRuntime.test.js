@@ -160,6 +160,7 @@ describe('tar extraction used for the Chromium runtime libraries', () => {
       header.write('00000000000\0', 136, 12, 'ascii')
       header.write('        ', 148, 8, 'ascii')
       header.write(entry.type || '0', 156, 1, 'ascii')
+      if (entry.linkName) header.write(entry.linkName, 157, 100, 'utf8')
       header.write('ustar\0', 257, 6, 'ascii')
       let checksum = 0
       for (const byte of header) checksum += byte
@@ -191,6 +192,113 @@ describe('tar extraction used for the Chromium runtime libraries', () => {
       expect(fs.readFileSync(path.join(destination, 'lib', 'libnss3.so'), 'utf8')).toBe('hello')
     } finally {
       fs.rmSync(destination, { recursive: true, force: true })
+    }
+  })
+
+  it('creates relative symlinks from the tar header linkname', async () => {
+    resetEnv()
+    vi.resetModules()
+    const { extractTarArchive } = await import('../src/scanners/chromiumRuntime.js')
+
+    const archive = buildTar([
+      { name: 'lib/aliases/libalias.so', type: '2', size: 0, linkName: '../libnss3.so' },
+      { name: 'lib/libnss3.so', size: 5, content: Buffer.from('hello') },
+    ])
+    const destination = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-tar-link-'))
+    try {
+      extractTarArchive(archive, destination)
+      const link = path.join(destination, 'lib', 'aliases', 'libalias.so')
+      expect(fs.readlinkSync(link)).toBe('../libnss3.so')
+      expect(fs.readFileSync(link, 'utf8')).toBe('hello')
+    } catch (error) {
+      if (process.platform !== 'win32' || !['EPERM', 'EACCES'].includes(error.code)) throw error
+    } finally {
+      fs.rmSync(destination, { recursive: true, force: true })
+    }
+  })
+
+  it('creates hard links, including links declared before their target', async () => {
+    resetEnv()
+    vi.resetModules()
+    const { extractTarArchive } = await import('../src/scanners/chromiumRuntime.js')
+
+    const archive = buildTar([
+      { name: 'lib/libalias.so', type: '1', size: 0, linkName: 'lib/libnss3.so' },
+      { name: 'lib/libnss3.so', size: 5, content: Buffer.from('hello') },
+    ])
+    const destination = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-tar-hardlink-'))
+    try {
+      extractTarArchive(archive, destination)
+      const alias = path.join(destination, 'lib', 'libalias.so')
+      const source = path.join(destination, 'lib', 'libnss3.so')
+      expect(fs.readFileSync(alias, 'utf8')).toBe('hello')
+      fs.writeFileSync(source, 'world')
+      expect(fs.readFileSync(alias, 'utf8')).toBe('world')
+    } finally {
+      fs.rmSync(destination, { recursive: true, force: true })
+    }
+  })
+
+  it('propagates symlink creation failures', async () => {
+    resetEnv()
+    vi.resetModules()
+    const { extractTarArchive } = await import('../src/scanners/chromiumRuntime.js')
+    const destination = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-tar-link-error-'))
+    const symlink = vi.spyOn(fs, 'symlinkSync').mockImplementation(() => {
+      throw Object.assign(new Error('symlink denied'), { code: 'EPERM' })
+    })
+
+    try {
+      const archive = buildTar([{ name: 'lib/libalias.so', type: '2', size: 0, linkName: 'libnss3.so' }])
+      expect(() => extractTarArchive(archive, destination)).toThrow('symlink denied')
+    } finally {
+      symlink.mockRestore()
+      fs.rmSync(destination, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects symlink targets that escape the extraction directory', async () => {
+    resetEnv()
+    vi.resetModules()
+    const { extractTarArchive } = await import('../src/scanners/chromiumRuntime.js')
+    const destination = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-tar-link-traversal-'))
+
+    try {
+      const archive = buildTar([{ name: 'lib/libalias.so', type: '2', size: 0, linkName: '../../outside' }])
+      expect(() => extractTarArchive(archive, destination)).toThrow(/escapes extraction directory/)
+    } finally {
+      fs.rmSync(destination, { recursive: true, force: true })
+    }
+  })
+
+  it.each(['../escape', '/outside', 'C:\\outside'])('rejects tar path traversal: %s', async (name) => {
+    resetEnv()
+    vi.resetModules()
+    const { extractTarArchive } = await import('../src/scanners/chromiumRuntime.js')
+
+    const base = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-tar-traversal-'))
+    const destination = path.join(base, 'extract')
+    try {
+      expect(() => extractTarArchive(buildTar([{ name, size: 5, content: Buffer.from('hello') }]), destination)).toThrow(
+        /Invalid tar path|escapes extraction directory/,
+      )
+      expect(fs.existsSync(path.join(base, 'escape'))).toBe(false)
+      expect(fs.existsSync(path.join(base, 'outside'))).toBe(false)
+    } finally {
+      fs.rmSync(base, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects extraction when required Chromium libraries are missing or unreadable', async () => {
+    resetEnv()
+    vi.resetModules()
+    const { verifyRequiredLibraries } = await import('../src/scanners/chromiumRuntime.js')
+    const libraryDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-required-libs-'))
+
+    try {
+      expect(() => verifyRequiredLibraries(libraryDir)).toThrow(/libnss3\.so.*libnspr4\.so.*libexpat\.so\.1/)
+    } finally {
+      fs.rmSync(libraryDir, { recursive: true, force: true })
     }
   })
 })
