@@ -10,6 +10,8 @@ export function useScanner() {
   const history = ref([])
   const historyLoading = ref(false)
   const historyError = ref(null)
+  const historyActionError = ref(null)
+  const deletingScanId = ref('')
 
   const selectedReport = ref(null)
   const loadingReport = ref(false)
@@ -88,6 +90,24 @@ export function useScanner() {
     }
   }
 
+  async function deleteReport(id) {
+    if (scanning.value || loadingReport.value || deletingScanId.value) return
+    deletingScanId.value = id
+    historyActionError.value = null
+    try {
+      await api.deleteScan(id)
+      history.value = history.value.filter((item) => item.id !== id)
+      if (selectedReport.value?.id === id) selectedReport.value = null
+    } catch (error) {
+      historyActionError.value =
+        error instanceof ApiError
+          ? error
+          : new ApiError('DELETE_FAILED', 'The scan could not be deleted. Please try again.')
+    } finally {
+      deletingScanId.value = ''
+    }
+  }
+
   function exportReport() {
     const report = selectedReport.value
     if (!report) return
@@ -125,6 +145,8 @@ export function useScanner() {
     history,
     historyLoading,
     historyError,
+    historyActionError,
+    deletingScanId,
     selectedReport,
     loadingReport,
     scanning,
@@ -135,6 +157,7 @@ export function useScanner() {
     refreshHistory,
     runScan,
     openReport,
+    deleteReport,
     exportReport,
     clearScanError,
   }

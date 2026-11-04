@@ -1,4 +1,6 @@
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
+const OWNER_STORAGE_KEY = 'site-scanner-owner-id'
+let fallbackOwnerId = null
 
 export class ApiError extends Error {
   constructor(code, message, status = 0, details = null) {
@@ -10,12 +12,39 @@ export class ApiError extends Error {
   }
 }
 
-async function request(path, { method = 'GET', body } = {}) {
+function getOwnerId() {
+  try {
+    const current = window.localStorage.getItem(OWNER_STORAGE_KEY)
+    if (current && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(current)) {
+      return current
+    }
+
+    const ownerId = globalThis.crypto?.randomUUID?.()
+    if (!ownerId) throw new ApiError('OWNER_ID_UNAVAILABLE', 'Browser history storage is unavailable.')
+    window.localStorage.setItem(OWNER_STORAGE_KEY, ownerId)
+    return ownerId
+  } catch (error) {
+    if (error instanceof ApiError) throw error
+    if (!fallbackOwnerId) {
+      fallbackOwnerId = globalThis.crypto?.randomUUID?.()
+      if (!fallbackOwnerId) {
+        throw new ApiError('OWNER_ID_UNAVAILABLE', 'Browser history storage is unavailable.')
+      }
+    }
+    return fallbackOwnerId
+  }
+}
+
+async function request(path, { method = 'GET', body, ownerScoped = false } = {}) {
+  const headers = {
+    ...(body ? { 'Content-Type': 'application/json' } : {}),
+    ...(ownerScoped ? { 'X-Scanner-Owner': getOwnerId() } : {}),
+  }
   let response
   try {
     response = await fetch(`${API_BASE}${path}`, {
       method,
-      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      headers,
       body: body ? JSON.stringify(body) : undefined,
       credentials: 'same-origin',
     })
@@ -48,8 +77,9 @@ async function request(path, { method = 'GET', body } = {}) {
 
 export const api = {
   health: () => request('/health'),
-  createScan: (url) => request('/scans', { method: 'POST', body: { url } }),
+  createScan: (url) => request('/scans', { method: 'POST', body: { url }, ownerScoped: true }),
   listScans: ({ page = 1, limit = 12 } = {}) =>
-    request(`/scans?page=${encodeURIComponent(page)}&limit=${encodeURIComponent(limit)}`),
-  getScan: (id) => request(`/scans/${encodeURIComponent(id)}`),
+    request(`/scans?page=${encodeURIComponent(page)}&limit=${encodeURIComponent(limit)}`, { ownerScoped: true }),
+  getScan: (id) => request(`/scans/${encodeURIComponent(id)}`, { ownerScoped: true }),
+  deleteScan: (id) => request(`/scans/${encodeURIComponent(id)}`, { method: 'DELETE', ownerScoped: true }),
 }

@@ -51,8 +51,8 @@ export function createApp() {
         if (process.env.VERCEL && origin.endsWith('.vercel.app')) return callback(null, true)
         return callback(new AppError('CORS_NOT_ALLOWED', 'This origin is not allowed to call the API.', { statusCode: 403 }))
       },
-      methods: ['GET', 'POST', 'OPTIONS'],
-      allowedHeaders: ['Content-Type'],
+      methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'X-Scanner-Owner'],
       maxAge: 86400,
     }),
   )

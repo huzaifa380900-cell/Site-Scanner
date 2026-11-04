@@ -27,6 +27,8 @@ const {
   history,
   historyLoading,
   historyError,
+  historyActionError,
+  deletingScanId,
   selectedReport,
   loadingReport,
   scanning,
@@ -36,6 +38,7 @@ const {
   refreshHistory,
   runScan,
   openReport,
+  deleteReport,
   exportReport,
   clearScanError,
 } = useScanner()
@@ -253,10 +256,13 @@ async function selectReport(id) {
           :items="history"
           :loading="historyLoading"
           :error="historyError"
+          :action-error="historyActionError"
+          :deleting-id="deletingScanId"
           :selected-id="selectedReport?.id || ''"
           :disabled="scanning || loadingReport"
           @refresh="refreshHistory"
           @select="selectReport"
+          @delete="deleteReport"
         />
 
         <section class="panel p-4">

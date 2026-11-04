@@ -19,6 +19,8 @@ import { ScanReport } from '../models/ScanReport.js'
 
 const semaphore = createSemaphore(config.maxScanConcurrency)
 const inFlight = new Map()
+const MAX_HISTORY_PER_OWNER = 12
+const MAX_STORED_REPORTS = 100
 
 function assertDatabaseReady() {
   if (!isDatabaseConnected()) {
@@ -182,7 +184,7 @@ export async function runPipeline(validated) {
  * @param {string} rawUrl
  * @param {{clientKey?: string}} [options]
  */
-export async function createScan(rawUrl, { clientKey = 'anonymous' } = {}) {
+export async function createScan(rawUrl, { clientKey = 'anonymous', ownerHash } = {}) {
   // Security validation always happens before any outbound request and
   // before database access.
   const validated = await validateTargetUrl(rawUrl)
@@ -211,7 +213,7 @@ export async function createScan(rawUrl, { clientKey = 'anonymous' } = {}) {
 
     let saved
     try {
-      saved = await ScanReport.create(report)
+      saved = await ScanReport.create({ ...report, ownerHash })
     } catch (error) {
       console.error(`[scan] Failed to persist report: ${error.message}`)
       throw new AppError(
@@ -221,6 +223,12 @@ export async function createScan(rawUrl, { clientKey = 'anonymous' } = {}) {
       )
     }
 
+    try {
+      await pruneScanHistory(ownerHash)
+    } catch (error) {
+      console.error(`[scan] Failed to enforce scan-history retention: ${error.message}`)
+    }
+
     return saved.toJSON()
   } finally {
     inFlight.delete(lockKey)
@@ -228,14 +236,15 @@ export async function createScan(rawUrl, { clientKey = 'anonymous' } = {}) {
   }
 }
 
-export async function listScans({ page = 1, limit = 10 } = {}) {
+export async function listScans({ page = 1, limit = 10, ownerHash } = {}) {
   assertDatabaseReady()
   const safePage = Math.max(1, Number(page) || 1)
   const safeLimit = Math.min(50, Math.max(1, Number(limit) || 10))
   const skip = (safePage - 1) * safeLimit
 
+  const filter = { ownerHash }
   const [items, total] = await Promise.all([
-    ScanReport.find({})
+    ScanReport.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(safeLimit)
@@ -243,7 +252,7 @@ export async function listScans({ page = 1, limit = 10 } = {}) {
         'targetUrl hostname status httpStatus durationMs observationScore findingCount severityCounts createdAt completedAt',
       )
       .lean(),
-    ScanReport.countDocuments({}),
+    ScanReport.countDocuments(filter),
   ])
 
   return {
@@ -269,16 +278,43 @@ export async function listScans({ page = 1, limit = 10 } = {}) {
   }
 }
 
-export async function getScanById(id) {
+export async function getScanById(id, ownerHash) {
   assertDatabaseReady()
   if (!/^[0-9a-fA-F]{24}$/.test(String(id || ''))) {
     throw new AppError('INVALID_ID', 'The scan report ID is invalid.', { statusCode: 400 })
   }
-  const report = await ScanReport.findById(id)
+  const report = await ScanReport.findOne({ _id: id, ownerHash })
   if (!report) {
     throw new AppError('NOT_FOUND', 'Scan report not found.', { statusCode: 404 })
   }
   return report.toJSON()
+}
+
+export async function deleteScanById(id, ownerHash) {
+  assertDatabaseReady()
+  if (!/^[0-9a-fA-F]{24}$/.test(String(id || ''))) {
+    throw new AppError('INVALID_ID', 'The scan report ID is invalid.', { statusCode: 400 })
+  }
+  const result = await ScanReport.deleteOne({ _id: id, ownerHash })
+  if (result.deletedCount === 0) {
+    throw new AppError('NOT_FOUND', 'Scan report not found.', { statusCode: 404 })
+  }
+}
+
+async function pruneScanHistory(ownerHash) {
+  await deleteReportsBeyond({ ownerHash }, MAX_HISTORY_PER_OWNER)
+  await deleteReportsBeyond({}, MAX_STORED_REPORTS)
+}
+
+async function deleteReportsBeyond(filter, limit) {
+  const excess = await ScanReport.find(filter)
+    .sort({ createdAt: -1, _id: -1 })
+    .skip(limit)
+    .select('_id')
+    .lean()
+  if (excess.length) {
+    await ScanReport.deleteMany({ _id: { $in: excess.map((report) => report._id) } })
+  }
 }
 
 export function getScannerCapacity() {

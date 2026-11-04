@@ -75,6 +75,7 @@ const scanReportSchema = new mongoose.Schema(
   {
     targetUrl: { type: String, required: true, maxlength: 2048 },
     hostname: { type: String, required: true, maxlength: 253, index: true },
+    ownerHash: { type: String, required: true, select: false },
     status: { type: String, enum: ['completed', 'failed'], default: 'completed', required: true },
     httpStatus: { type: Number, default: null },
     durationMs: { type: Number, min: 0, default: 0 },
@@ -110,6 +111,7 @@ const scanReportSchema = new mongoose.Schema(
         ret.id = String(ret._id)
         delete ret._id
         delete ret.__v
+        delete ret.ownerHash
         return ret
       },
     },
@@ -119,6 +121,7 @@ const scanReportSchema = new mongoose.Schema(
 // Recent-history listing and per-host lookups.
 scanReportSchema.index({ createdAt: -1 })
 scanReportSchema.index({ hostname: 1, createdAt: -1 })
+scanReportSchema.index({ ownerHash: 1, createdAt: -1 })
 
 scanReportSchema.pre('validate', function syncFindingCounts(next) {
   if (Array.isArray(this.findings)) {

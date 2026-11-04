@@ -1,6 +1,7 @@
+import { createHash } from 'node:crypto'
 import { z } from 'zod'
 import { AppError } from '../utils/errors.js'
-import { createScan, getScanById, listScans } from '../services/scan.service.js'
+import { createScan, deleteScanById, getScanById, listScans } from '../services/scan.service.js'
 
 /**
  * Route controllers validate input, call the scan service and shape the API
@@ -32,12 +33,25 @@ function validationError(error) {
   })
 }
 
+function getOwnerHash(req) {
+  const parsed = z.string().uuid().safeParse(req.get('x-scanner-owner'))
+  if (!parsed.success) {
+    throw new AppError('OWNER_REQUIRED', 'The browser history identifier is missing or invalid.', {
+      statusCode: 400,
+    })
+  }
+  return createHash('sha256').update(parsed.data).digest('hex')
+}
+
 export async function createScanController(req, res, next) {
   try {
     const parsed = createScanSchema.safeParse(req.body)
     if (!parsed.success) throw validationError(parsed.error)
 
-    const report = await createScan(parsed.data.url, { clientKey: req.ip || 'unknown' })
+    const report = await createScan(parsed.data.url, {
+      clientKey: req.ip || 'unknown',
+      ownerHash: getOwnerHash(req),
+    })
     res.status(201).json({ success: true, data: report })
   } catch (error) {
     next(error)
@@ -49,7 +63,7 @@ export async function listScansController(req, res, next) {
     const parsed = listQuerySchema.safeParse(req.query)
     if (!parsed.success) throw validationError(parsed.error)
 
-    const result = await listScans(parsed.data)
+    const result = await listScans({ ...parsed.data, ownerHash: getOwnerHash(req) })
     res.json({ success: true, data: result })
   } catch (error) {
     next(error)
@@ -58,8 +72,17 @@ export async function listScansController(req, res, next) {
 
 export async function getScanController(req, res, next) {
   try {
-    const report = await getScanById(req.params.id)
+    const report = await getScanById(req.params.id, getOwnerHash(req))
     res.json({ success: true, data: report })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function deleteScanController(req, res, next) {
+  try {
+    await deleteScanById(req.params.id, getOwnerHash(req))
+    res.json({ success: true, data: { deleted: true } })
   } catch (error) {
     next(error)
   }

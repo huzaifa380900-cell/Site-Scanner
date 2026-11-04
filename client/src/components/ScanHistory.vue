@@ -1,19 +1,27 @@
 <script setup>
-import { ChevronRight, Database, History, RefreshCw } from 'lucide-vue-next'
+import { AlertTriangle, ChevronRight, Database, History, Lock, RefreshCw, Trash2 } from 'lucide-vue-next'
 import { formatDate, statusCodeTone } from '../utils/formatters.js'
 
 defineProps({
   items: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },
   error: { type: Object, default: null },
+  actionError: { type: Object, default: null },
+  deletingId: { type: String, default: '' },
   selectedId: { type: String, default: '' },
   disabled: { type: Boolean, default: false },
 })
 
-defineEmits(['refresh', 'select'])
+const emit = defineEmits(['refresh', 'select', 'delete'])
 
 function statusClass(status) {
   return status === 'completed' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'
+}
+
+function confirmDelete(item) {
+  if (window.confirm(`Delete the saved scan for ${item.hostname}? This cannot be undone.`)) {
+    emit('delete', item.id)
+  }
 }
 </script>
 <template>
@@ -90,9 +98,9 @@ function statusClass(status) {
       <div class="mx-auto grid h-12 w-12 place-items-center rounded-xl border border-white/[0.08] bg-white/[0.02]">
         <Database :size="20" class="text-slate-500" />
       </div>
-      <p class="mt-3 text-xs font-semibold text-slate-300">No saved scans yet</p>
+      <p class="mt-3 text-xs font-semibold text-slate-300">No scans saved in this browser yet</p>
       <p class="mt-1 max-w-xs mx-auto text-[11px] leading-relaxed text-slate-500">
-        Completed reports are stored in MongoDB and will appear here.
+        Your latest 12 reports appear here. Older reports are deleted automatically.
       </p>
     </div>
 
@@ -100,10 +108,10 @@ function statusClass(status) {
          LIST
          ═══════════════════════════════════════════════ -->
     <ul v-else class="custom-scroll max-h-[420px] space-y-1.5 overflow-y-auto p-2">
-      <li v-for="item in items" :key="item.id">
+      <li v-for="item in items" :key="item.id" class="flex items-stretch gap-1">
         <button
           type="button"
-          class="group relative flex w-full items-center gap-2 overflow-hidden rounded-lg border px-3 py-2.5 text-left transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60"
+          class="group relative flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-lg border px-3 py-2.5 text-left transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60"
           :class="
             item.id === selectedId
               ? 'border-cyan-400/40 bg-cyan-400/[0.07] shadow-[0_0_0_1px_rgba(34,211,238,0.12)]'
@@ -154,8 +162,26 @@ function statusClass(status) {
             :class="item.id === selectedId ? 'translate-x-0.5 text-cyan-300' : 'text-slate-600 group-hover:translate-x-0.5 group-hover:text-cyan-300'"
           />
         </button>
+        <button
+          type="button"
+          class="grid w-9 shrink-0 place-items-center rounded-lg border border-transparent text-slate-500 transition-colors hover:border-rose-400/20 hover:bg-rose-500/10 hover:text-rose-300 disabled:cursor-not-allowed disabled:opacity-40"
+          :disabled="disabled || Boolean(deletingId)"
+          :aria-label="`Delete scan for ${item.hostname}`"
+          :title="deletingId === item.id ? 'Deleting scan' : 'Delete scan'"
+          @click="confirmDelete(item)"
+        >
+          <Trash2 :size="14" :class="deletingId === item.id ? 'animate-pulse' : ''" />
+        </button>
       </li>
     </ul>
+
+    <p
+      v-if="actionError"
+      class="mx-3 mb-2 rounded-lg border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-[11px] text-rose-200"
+      role="alert"
+    >
+      {{ actionError.message }}
+    </p>
 
     <!-- ═══════════════════════════════════════════════
          FOOTER
@@ -163,9 +189,9 @@ function statusClass(status) {
     <div class="flex items-center justify-between gap-2 border-t border-white/[0.06] bg-white/[0.01] px-4 py-2.5 text-[10px] text-slate-600">
       <span class="flex items-center gap-1.5">
         <Lock :size="10" class="text-slate-600" />
-        Read-only history
+        Your browser history
       </span>
-      <span class="tabular">max 12 shown</span>
+      <span class="tabular text-right">12 saved · older auto-delete</span>
     </div>
   </section>
 </template>
