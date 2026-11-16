@@ -96,8 +96,8 @@ const stats = computed(() => [
     <!-- Ambient background glow -->
     <div class="pointer-events-none absolute inset-0" aria-hidden="true">
       <div class="shimmer-line absolute inset-x-0 top-0 h-px" />
-      <div class="absolute -top-32 -left-24 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
-      <div class="absolute -top-32 -right-24 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl" />
+      <div class="absolute -top-32 -left-24 h-72 w-72 rounded-full bg-lime-400/10 blur-3xl" />
+      <div class="absolute -top-32 -right-24 h-72 w-72 rounded-full bg-green-400/8 blur-3xl" />
     </div>
 
     <!-- ═══════════════════════════════════════════════════
@@ -106,7 +106,7 @@ const stats = computed(() => [
     <div class="panel-head relative">
       <div class="min-w-0">
         <p class="eyebrow">Scan report</p>
-        <h2 class="mt-0.5 truncate bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-lg font-semibold tracking-tight text-transparent sm:text-xl">
+        <h2 class="mt-0.5 truncate text-lg font-semibold tracking-tight text-gray-900 sm:text-xl">
           {{ report.hostname }}
         </h2>
       </div>
@@ -115,24 +115,24 @@ const stats = computed(() => [
           class="badge badge-sm border-0 font-medium shadow-sm transition-transform duration-300 hover:scale-105"
           :class="
             report.status === 'completed'
-              ? 'bg-emerald-500/15 text-emerald-300 shadow-emerald-500/10'
-              : 'bg-rose-500/15 text-rose-300 shadow-rose-500/10'
+              ? 'bg-emerald-100 text-emerald-700 shadow-emerald-200/50'
+              : 'bg-rose-100 text-rose-700 shadow-rose-200/50'
           "
         >
           <span class="relative mr-1 inline-flex h-1.5 w-1.5">
             <span
               v-if="report.status === 'completed'"
-              class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"
+              class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60"
             />
             <span
               class="relative inline-flex h-1.5 w-1.5 rounded-full"
-              :class="report.status === 'completed' ? 'bg-emerald-400' : 'bg-rose-400'"
+              :class="report.status === 'completed' ? 'bg-emerald-500' : 'bg-rose-500'"
             />
           </span>
           {{ report.status === 'completed' ? 'Completed' : report.status }}
         </span>
         <button
-          class="btn btn-sm h-9 min-h-0 gap-2 border-white/10 bg-white/[0.03] text-slate-200 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-400/25 hover:bg-cyan-400/[0.08] hover:text-cyan-200 hover:shadow-lg hover:shadow-cyan-500/10"
+          class="btn btn-sm h-9 min-h-0 gap-2 border-slate-200 bg-white text-slate-700 transition-all duration-300 hover:-translate-y-0.5 hover:border-lime-400 hover:bg-lime-50 hover:text-lime-700 hover:shadow-md hover:shadow-lime-200/50"
           @click="$emit('export')"
         >
           <Download :size="15" class="transition-transform duration-300 group-hover:translate-y-0.5" />
@@ -146,8 +146,8 @@ const stats = computed(() => [
          ═══════════════════════════════════════════════════ -->
     <div class="relative grid gap-6 p-5 sm:p-6 lg:grid-cols-[230px_minmax(0,1fr)]">
       <!-- ─── Score card ─────────────────────────────── -->
-      <div class="group/score relative overflow-hidden rounded-xl border border-white/[0.06] bg-[#070d19]/70 p-5 transition-colors duration-300 hover:border-white/[0.1]">
-        <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent opacity-0 transition-opacity duration-500 group-hover/score:opacity-100" />
+      <div class="group/score relative overflow-hidden rounded-xl border border-lime-200 bg-lime-50/50 p-5 transition-colors duration-300 hover:border-lime-300">
+        <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-lime-400/40 to-transparent opacity-0 transition-opacity duration-500 group-hover/score:opacity-100" />
 
         <div class="flex items-center justify-between gap-2">
           <p class="eyebrow">Observation score</p>
@@ -157,7 +157,7 @@ const stats = computed(() => [
           >
             <Info
               :size="14"
-              class="cursor-help text-slate-500 transition-colors duration-300 hover:text-cyan-300"
+              class="cursor-help text-slate-400 transition-colors duration-300 hover:text-lime-600"
               aria-label="Score method information"
             />
           </span>
@@ -167,7 +167,7 @@ const stats = computed(() => [
         <div class="relative mx-auto mt-3 h-32 w-32">
           <!-- Glow halo -->
           <div
-            class="absolute inset-2 rounded-full blur-2xl opacity-40 transition-opacity duration-500 group-hover/score:opacity-70"
+            class="absolute inset-2 rounded-full blur-2xl opacity-30 transition-opacity duration-500 group-hover/score:opacity-50"
             :style="{ backgroundColor: tone.stroke }"
           />
           <svg viewBox="0 0 100 100" class="relative h-32 w-32 -rotate-90" aria-hidden="true">
@@ -177,7 +177,7 @@ const stats = computed(() => [
                 <stop offset="100%" :stop-color="tone.stroke" stop-opacity="1" />
               </linearGradient>
             </defs>
-            <circle cx="50" cy="50" r="42" fill="none" stroke="#1e293b" stroke-width="8" />
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#e2e8f0" stroke-width="8" />
             <circle
               cx="50"
               cy="50"
@@ -207,11 +207,11 @@ const stats = computed(() => [
         </p>
 
         <!-- Severity breakdown -->
-        <div class="mt-4 grid grid-cols-5 gap-1 border-t border-white/[0.06] pt-3">
+        <div class="mt-4 grid grid-cols-5 gap-1 border-t border-lime-200 pt-3">
           <div
             v-for="severity in ['critical', 'high', 'medium', 'low', 'info']"
             :key="severity"
-            class="group/sev cursor-default rounded-md py-1 text-center transition-colors duration-200 hover:bg-white/[0.03]"
+            class="group/sev cursor-default rounded-md py-1 text-center transition-colors duration-200 hover:bg-lime-100/60"
           >
             <p class="text-sm font-bold tabular transition-transform duration-300 group-hover/sev:scale-110" :class="severityMeta(severity).text">
               {{ severityCounts[severity] }}
@@ -226,24 +226,24 @@ const stats = computed(() => [
         <div
           v-for="(stat, index) in stats"
           :key="stat.label"
-          class="group/stat relative overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.12] hover:bg-white/[0.035] hover:shadow-lg hover:shadow-black/20"
+          class="group/stat relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-lime-300 hover:shadow-md hover:shadow-lime-200/30"
           :style="{ animationDelay: `${index * 40}ms` }"
         >
           <!-- Per-card top shimmer -->
-          <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent opacity-0 transition-opacity duration-500 group-hover/stat:opacity-100" />
+          <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-lime-400/40 to-transparent opacity-0 transition-opacity duration-500 group-hover/stat:opacity-100" />
           <!-- Corner glow -->
-          <div class="pointer-events-none absolute -top-12 -right-12 h-24 w-24 rounded-full bg-cyan-500/[0.06] blur-2xl opacity-0 transition-opacity duration-500 group-hover/stat:opacity-100" />
+          <div class="pointer-events-none absolute -top-12 -right-12 h-24 w-24 rounded-full bg-lime-400/10 blur-2xl opacity-0 transition-opacity duration-500 group-hover/stat:opacity-100" />
 
           <div class="relative flex items-start justify-between gap-2">
             <p class="text-[11px] font-medium uppercase tracking-wider text-slate-500">{{ stat.label }}</p>
             <component
               :is="stat.icon"
               :size="15"
-              class="text-slate-500 transition-all duration-300 group-hover/stat:text-cyan-300 group-hover/stat:scale-110"
+              class="text-slate-400 transition-all duration-300 group-hover/stat:text-lime-600 group-hover/stat:scale-110"
               aria-hidden="true"
             />
           </div>
-          <p class="relative mt-1.5 text-2xl font-bold tabular text-slate-100">
+          <p class="relative mt-1.5 text-2xl font-bold tabular text-gray-900">
             <span
               v-if="stat.badge"
               class="badge badge-lg border px-2.5 py-3 text-base font-semibold shadow-sm transition-transform duration-300 group-hover/stat:scale-105"
@@ -261,28 +261,28 @@ const stats = computed(() => [
     <!-- ═══════════════════════════════════════════════════
          FOOTER META
          ═══════════════════════════════════════════════════ -->
-    <div class="relative flex flex-col gap-2 border-t border-white/[0.06] bg-white/[0.01] px-5 py-3.5 text-[11px] text-slate-500 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:px-6">
+    <div class="relative flex flex-col gap-2 border-t border-slate-100 bg-slate-50/50 px-5 py-3.5 text-[11px] text-slate-500 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:px-6">
       <span class="group/url flex min-w-0 items-center gap-1.5">
-        <Globe :size="13" class="shrink-0 text-cyan-400/70 transition-colors duration-300 group-hover/url:text-cyan-300" />
+        <Globe :size="13" class="shrink-0 text-lime-600/70 transition-colors duration-300 group-hover/url:text-lime-600" />
         <a
           :href="report.targetUrl"
           target="_blank"
           rel="noopener noreferrer nofollow"
-          class="linkish truncate font-mono transition-colors duration-200 hover:text-cyan-300"
+          class="linkish truncate font-mono transition-colors duration-200 hover:text-lime-700"
           :title="report.targetUrl"
         >
           {{ truncate(report.targetUrl, 82) }}
         </a>
-        <ExternalLink :size="11" class="shrink-0 text-slate-600 transition-all duration-200 group-hover/url:-translate-y-0.5 group-hover/url:translate-x-0.5 group-hover/url:text-cyan-300" />
+        <ExternalLink :size="11" class="shrink-0 text-slate-400 transition-all duration-200 group-hover/url:-translate-y-0.5 group-hover/url:translate-x-0.5 group-hover/url:text-lime-600" />
       </span>
-      <span class="hidden text-slate-700 sm:inline">|</span>
+      <span class="hidden text-slate-300 sm:inline">|</span>
       <span>
-        Scanned <span class="font-medium text-slate-400">{{ formatDateTime(report.completedAt) }}</span>
+        Scanned <span class="font-medium text-slate-600">{{ formatDateTime(report.completedAt) }}</span>
       </span>
-      <span class="hidden text-slate-700 sm:inline">|</span>
+      <span class="hidden text-slate-300 sm:inline">|</span>
       <span>
         Report ID
-        <span class="rounded bg-white/[0.04] px-1.5 py-0.5 font-mono text-slate-400">{{ truncate(report.id, 12) }}</span>
+        <span class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-500">{{ truncate(report.id, 12) }}</span>
       </span>
     </div>
   </section>
@@ -291,7 +291,7 @@ const stats = computed(() => [
 <style scoped>
 /* Top shimmer */
 .shimmer-line {
-  background-image: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.6), transparent);
+  background-image: linear-gradient(90deg, transparent, rgba(132, 204, 22, 0.5), transparent);
   background-size: 200% 100%;
   animation: shimmerBorder 5s ease-in-out infinite;
 }

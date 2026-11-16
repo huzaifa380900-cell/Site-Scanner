@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { Cpu } from 'lucide-vue-next'
+import { Cpu, Layers } from 'lucide-vue-next'
 import { CONFIDENCE_CLASSES, TECH_CATEGORY_LABELS, techCategoryLabel, truncate } from '../utils/formatters.js'
 
 const props = defineProps({
@@ -33,13 +33,13 @@ const inferredServers = computed(() => props.technologies.filter((tech) => tech.
          ═══════════════════════════════════════════════════ -->
     <div
       v-if="!technologies.length"
-      class="relative flex flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-white/10 bg-white/[0.01] px-6 py-14 text-center"
+      class="relative flex flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center"
     >
-      <div class="pointer-events-none absolute -top-24 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-slate-500/10 blur-3xl" />
-      <div class="relative grid h-14 w-14 place-items-center rounded-2xl border border-white/[0.08] bg-white/[0.02] shadow-lg shadow-black/20">
-        <Cpu :size="26" class="text-slate-500" />
+      <div class="pointer-events-none absolute -top-24 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-slate-400/10 blur-3xl" />
+      <div class="relative grid h-14 w-14 place-items-center rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <Cpu :size="26" class="text-slate-400" />
       </div>
-      <p class="relative mt-4 text-sm font-semibold text-slate-200">No technologies were identified</p>
+      <p class="relative mt-4 text-sm font-semibold text-gray-900">No technologies were identified</p>
       <p class="relative mt-1.5 max-w-md text-xs leading-relaxed text-slate-500">
         The page did not expose any of the public markers in the fingerprint registry. Absence of a detection does not mean
         the technology is absent.
@@ -51,14 +51,14 @@ const inferredServers = computed(() => props.technologies.filter((tech) => tech.
            SUMMARY BAR
            ═══════════════════════════════════════════════════ -->
       <div class="mb-4 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-        <span class="chip group inline-flex items-center gap-1.5 border-cyan-400/20 bg-cyan-400/[0.06] text-cyan-200 transition-colors duration-300 hover:bg-cyan-400/[0.1]">
+        <span class="chip group inline-flex items-center gap-1.5 border-lime-300 bg-lime-50 text-lime-700 transition-colors duration-300 hover:bg-lime-100">
           <Cpu :size="12" class="transition-transform duration-300 group-hover:rotate-12" />
           <span class="font-medium">{{ technologies.length }}</span>
           detection{{ technologies.length === 1 ? '' : 's' }}
         </span>
         <span
           v-if="inferredServers"
-          class="chip border-amber-400/20 bg-amber-500/[0.06] text-amber-200 transition-colors duration-300 hover:bg-amber-500/[0.1]"
+          class="chip border-amber-300 bg-amber-50 text-amber-700 transition-colors duration-300 hover:bg-amber-100"
         >
           Server software inferred only from response headers
         </span>
@@ -72,33 +72,33 @@ const inferredServers = computed(() => props.technologies.filter((tech) => tech.
         <section
           v-for="group in groups"
           :key="group.category"
-          class="group/section relative overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.015] transition-colors duration-300 hover:border-white/[0.1]"
+          class="group/section relative overflow-hidden rounded-xl border border-slate-200 bg-white transition-colors duration-300 hover:border-lime-300"
         >
           <!-- Top shimmer -->
-          <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent opacity-0 transition-opacity duration-500 group-hover/section:opacity-100" />
+          <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-lime-400/30 to-transparent opacity-0 transition-opacity duration-500 group-hover/section:opacity-100" />
 
           <!-- Category header -->
-          <header class="flex items-center justify-between gap-2 border-b border-white/[0.06] bg-white/[0.01] px-4 py-3">
+          <header class="flex items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/50 px-4 py-3">
             <div class="flex items-center gap-2.5">
-              <div class="grid h-7 w-7 place-items-center rounded-md border border-violet-400/20 bg-violet-500/10 transition-colors duration-300 group-hover/section:border-violet-400/30">
-                <Layers :size="14" class="text-violet-300" />
+              <div class="grid h-7 w-7 place-items-center rounded-md border border-lime-300 bg-lime-100 transition-colors duration-300 group-hover/section:border-lime-400">
+                <Layers :size="14" class="text-lime-600" />
               </div>
-              <h3 class="text-sm font-semibold text-slate-200">{{ group.label }}</h3>
+              <h3 class="text-sm font-semibold text-gray-900">{{ group.label }}</h3>
             </div>
-            <span class="badge badge-sm border-0 bg-white/[0.05] text-[10px] font-semibold text-slate-400">
+            <span class="badge badge-sm border-0 bg-slate-100 text-[10px] font-semibold text-slate-600">
               {{ group.items.length }}
             </span>
           </header>
 
           <!-- Tech items -->
-          <div class="divide-y divide-white/[0.05]">
+          <div class="divide-y divide-slate-100">
             <div
               v-for="tech in group.items"
               :key="`${group.category}-${tech.name}`"
-              class="group/item p-4 transition-colors duration-200 hover:bg-white/[0.02]"
+              class="group/item p-4 transition-colors duration-200 hover:bg-lime-50/50"
             >
               <div class="flex flex-wrap items-center justify-between gap-2">
-                <p class="text-sm font-semibold text-slate-100 transition-colors duration-200 group-hover/item:text-white">
+                <p class="text-sm font-semibold text-gray-900 transition-colors duration-200 group-hover/item:text-lime-700">
                   {{ tech.name }}
                 </p>
                 <span
@@ -109,19 +109,19 @@ const inferredServers = computed(() => props.technologies.filter((tech) => tech.
                 </span>
               </div>
 
-              <p v-if="tech.description" class="mt-1.5 text-xs leading-relaxed text-slate-400">
+              <p v-if="tech.description" class="mt-1.5 text-xs leading-relaxed text-slate-500">
                 {{ tech.description }}
               </p>
 
               <div class="mt-2.5">
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                   Evidence
                 </p>
                 <ul class="mt-1 space-y-1">
                   <li
                     v-for="(item, index) in tech.evidence"
                     :key="index"
-                    class="break-words rounded border border-white/[0.05] bg-[#070d19]/70 px-2 py-1.5 font-mono text-[11px] text-slate-400 transition-colors duration-200 hover:border-cyan-400/20 hover:bg-[#070d19] hover:text-slate-300"
+                    class="break-words rounded border border-slate-200 bg-slate-50 px-2 py-1.5 font-mono text-[11px] text-slate-500 transition-colors duration-200 hover:border-lime-300 hover:bg-lime-50 hover:text-slate-600"
                     :title="item"
                   >
                     {{ truncate(item, 140) }}

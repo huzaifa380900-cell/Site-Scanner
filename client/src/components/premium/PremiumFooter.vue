@@ -8,21 +8,10 @@
         <div class="lg:col-span-4">
           <div class="space-y-4">
             <!-- Logo and Brand -->
-            <div class="flex items-center space-x-3">
-              <div class="relative">
-                <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-lime-400 to-green-400 opacity-20 blur-md" />
-                <div class="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-lime-500 to-green-500 border border-lime-400 shadow-brand-sm">
-                  <img src="/favicon.svg" alt="Site Scanner" class="w-6 h-6 brightness-0 invert" />
-                </div>
-              </div>
-              <div class="flex flex-col">
-                <span class="text-slate-900 font-bold text-xl tracking-tight">
-                  Site Scanner
-                </span>
-                <span class="text-sm text-slate-500 font-medium tracking-wide">
-                  Premium Website Analysis
-                </span>
-              </div>
+            <div class="flex items-center">
+              <router-link to="/" class="flex items-center" aria-label="Site Scanner Home">
+                <img src="/logo.png" alt="Site Scanner" class="h-8 sm:h-9 md:h-10 w-auto object-contain" />
+              </router-link>
             </div>
 
             <p class="text-slate-500 text-sm leading-relaxed max-w-md">

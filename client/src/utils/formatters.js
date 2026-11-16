@@ -1,38 +1,38 @@
 export const SEVERITY_META = {
   critical: {
     label: 'Critical',
-    badge: 'bg-rose-500/15 text-rose-300 border border-rose-400/25',
-    dot: 'bg-rose-400',
+    badge: 'bg-rose-100 text-rose-700 border border-rose-300',
+    dot: 'bg-rose-500',
     border: 'border-l-rose-500',
-    text: 'text-rose-300',
+    text: 'text-rose-600',
   },
   high: {
     label: 'High',
-    badge: 'bg-orange-500/15 text-orange-300 border border-orange-400/25',
-    dot: 'bg-orange-400',
+    badge: 'bg-orange-100 text-orange-700 border border-orange-300',
+    dot: 'bg-orange-500',
     border: 'border-l-orange-500',
-    text: 'text-orange-300',
+    text: 'text-orange-600',
   },
   medium: {
     label: 'Medium',
-    badge: 'bg-amber-500/15 text-amber-300 border border-amber-400/25',
-    dot: 'bg-amber-400',
+    badge: 'bg-amber-100 text-amber-700 border border-amber-300',
+    dot: 'bg-amber-500',
     border: 'border-l-amber-500',
-    text: 'text-amber-300',
+    text: 'text-amber-600',
   },
   low: {
     label: 'Low',
-    badge: 'bg-sky-500/15 text-sky-300 border border-sky-400/25',
-    dot: 'bg-sky-400',
-    border: 'border-l-sky-500',
-    text: 'text-sky-300',
+    badge: 'bg-lime-100 text-lime-800 border border-lime-300',
+    dot: 'bg-lime-500',
+    border: 'border-l-lime-500',
+    text: 'text-lime-700',
   },
   info: {
     label: 'Info',
-    badge: 'bg-slate-500/15 text-slate-300 border border-slate-400/20',
+    badge: 'bg-slate-100 text-slate-600 border border-slate-300',
     dot: 'bg-slate-400',
-    border: 'border-l-slate-500',
-    text: 'text-slate-300',
+    border: 'border-l-slate-400',
+    text: 'text-slate-600',
   },
 }
 
@@ -68,9 +68,9 @@ export const TECH_CATEGORY_LABELS = {
 }
 
 export const CONFIDENCE_CLASSES = {
-  high: 'bg-emerald-500/10 text-emerald-300 border border-emerald-400/20',
-  medium: 'bg-cyan-500/10 text-cyan-300 border border-cyan-400/20',
-  low: 'bg-slate-500/10 text-slate-400 border border-slate-400/20',
+  high: 'bg-emerald-100 text-emerald-700 border border-emerald-300',
+  medium: 'bg-lime-100 text-lime-800 border border-lime-300',
+  low: 'bg-slate-100 text-slate-500 border border-slate-300',
 }
 
 export function severityMeta(severity) {
@@ -165,21 +165,21 @@ export function truncateMiddle(value, max = 60) {
 
 export function scoreTone(score) {
   if (score === null || score === undefined) {
-    return { stroke: '#475569', text: 'text-slate-400', label: 'Unavailable' }
+    return { stroke: '#94a3b8', text: 'text-slate-500', label: 'Unavailable' }
   }
-  if (score >= 80) return { stroke: '#34d399', text: 'text-emerald-300', label: 'Good' }
-  if (score >= 60) return { stroke: '#22d3ee', text: 'text-cyan-300', label: 'Fair' }
-  if (score >= 40) return { stroke: '#fbbf24', text: 'text-amber-300', label: 'Needs attention' }
-  return { stroke: '#fb7185', text: 'text-rose-300', label: 'Poor' }
+  if (score >= 80) return { stroke: '#84cc16', text: 'text-lime-600', label: 'Good' }
+  if (score >= 60) return { stroke: '#a3e635', text: 'text-lime-600', label: 'Fair' }
+  if (score >= 40) return { stroke: '#f59e0b', text: 'text-amber-600', label: 'Needs attention' }
+  return { stroke: '#ef4444', text: 'text-rose-600', label: 'Poor' }
 }
 
 export function statusCodeTone(statusCode) {
   const code = Number(statusCode)
-  if (!code) return 'bg-slate-500/15 text-slate-300 border-slate-400/20'
-  if (code >= 200 && code < 300) return 'bg-emerald-500/15 text-emerald-300 border-emerald-400/25'
-  if (code >= 300 && code < 400) return 'bg-sky-500/15 text-sky-300 border-sky-400/25'
-  if (code >= 400 && code < 500) return 'bg-amber-500/15 text-amber-300 border-amber-400/25'
-  return 'bg-rose-500/15 text-rose-300 border-rose-400/25'
+  if (!code) return 'bg-slate-100 text-slate-500 border border-slate-300'
+  if (code >= 200 && code < 300) return 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+  if (code >= 300 && code < 400) return 'bg-sky-100 text-sky-700 border border-sky-300'
+  if (code >= 400 && code < 500) return 'bg-amber-100 text-amber-700 border border-amber-300'
+  return 'bg-rose-100 text-rose-700 border border-rose-300'
 }
 
 export function sanitizeFilename(value) {

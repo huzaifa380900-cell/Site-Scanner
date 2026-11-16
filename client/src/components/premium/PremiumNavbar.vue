@@ -12,30 +12,9 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16 lg:h-20">
         <!-- Logo and Brand -->
-        <div class="flex items-center space-x-3">
-          <router-link to="/" class="flex items-center space-x-3 group" aria-label="Site Scanner Home">
-            <!-- Animated Logo Container -->
-            <div class="relative">
-              <!-- Glow Effect -->
-              <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-lime-400 to-green-400 opacity-0 blur-md group-hover:opacity-20 transition-opacity duration-500" />
-              
-              <!-- Logo Icon -->
-              <div class="relative flex items-center justify-center w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br from-lime-500 to-green-500 border border-lime-400 shadow-brand-sm group-hover:shadow-brand-md transition-all duration-500">
-                <img src="/favicon.svg" alt="Site Scanner" class="w-6 h-6 brightness-0 invert" />
-                <!-- Pulsing Dot -->
-                <div class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-400/50" />
-              </div>
-            </div>
-            
-            <!-- Brand Text -->
-            <div class="flex flex-col">
-              <span class="text-slate-900 font-bold text-lg lg:text-xl tracking-tight">
-                Site Scanner
-              </span>
-              <span class="text-xs text-slate-500 font-medium tracking-wide">
-                Premium Analysis
-              </span>
-            </div>
+        <div class="flex items-center">
+          <router-link to="/" class="flex items-center group" aria-label="Site Scanner Home">
+            <img src="/logo.png" alt="Site Scanner" class="h-8 sm:h-9 md:h-10 w-auto object-contain" />
           </router-link>
         </div>
 
