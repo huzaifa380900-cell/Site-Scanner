@@ -20,11 +20,11 @@
           <!-- Main Heading -->
           <h1 class="hero-title text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-6">
             <span class="bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
-              Understand Any Website
+              Advanced Website
             </span>
             <br>
             <span class="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Security & Technology
+              Analysis & Intelligence
             </span>
           </h1>
 
@@ -57,10 +57,24 @@
             </button>
           </div>
 
-          <div class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/10 pt-5 text-xs text-gray-400">
-            <span>Passive website analysis</span>
-            <span>Publicly observable signals</span>
-            <span>No exploitation or intrusive testing</span>
+          <!-- Stats -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 max-w-3xl mx-auto">
+            <div class="stat-card text-center">
+              <div class="text-3xl lg:text-4xl font-bold text-white mb-2 stat-number">100%</div>
+              <div class="text-sm text-gray-400">Real-time Analysis</div>
+            </div>
+            <div class="stat-card text-center">
+              <div class="text-3xl lg:text-4xl font-bold text-white mb-2 stat-number">50+</div>
+              <div class="text-sm text-gray-400">Technologies Detected</div>
+            </div>
+            <div class="stat-card text-center">
+              <div class="text-3xl lg:text-4xl font-bold text-white mb-2 stat-number">∞</div>
+              <div class="text-sm text-gray-400">Unlimited Scans</div>
+            </div>
+            <div class="stat-card text-center">
+              <div class="text-3xl lg:text-4xl font-bold text-white mb-2 stat-number">24/7</div>
+              <div class="text-sm text-gray-400">Platform Availability</div>
+            </div>
           </div>
         </div>
       </div>
@@ -341,29 +355,85 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.landing-page{min-height:100vh;padding-top:5rem;color:#e8efec;background:#080b0d!important}
-.hero-section{padding-top:clamp(4rem,9vw,7.5rem)!important;padding-bottom:clamp(3.5rem,7vw,6rem)!important;background:#080b0d!important}
-.hero-section>.absolute{display:none!important}.hero-section .max-w-4xl{max-width:900px;text-align:left;margin-left:0}
-.hero-section .inline-flex.items-center.gap-2{border:1px solid rgba(226,239,235,.12)!important;background:rgba(255,255,255,.025)!important;border-radius:6px!important;padding:7px 10px!important}
-.hero-title{max-width:850px;margin-bottom:1.25rem!important;font-size:clamp(2.65rem,6vw,5.1rem)!important;line-height:1.04!important;letter-spacing:-.065em!important;font-weight:650!important}
-.hero-title span{background:none!important;color:#edf4f0!important;-webkit-text-fill-color:currentColor!important}.hero-title span:last-child{color:#36d4a5!important}
-.hero-subtitle{max-width:650px!important;margin-left:0!important;font-size:clamp(1rem,1.7vw,1.18rem)!important;line-height:1.75!important;color:#9ba9a4!important}
-.hero-cta{justify-content:flex-start!important;margin-bottom:3.5rem!important}
-.premium-button{min-height:48px;padding:0 21px!important;border-radius:8px!important;background:#27c99a!important;color:#06140f!important;box-shadow:none!important;transform:none!important}
-.premium-button>div{display:none!important}.premium-button:hover{background:#45d9ad!important;box-shadow:0 5px 18px rgba(39,201,154,.14)!important}
-.premium-button-outline{min-height:48px;padding:0 20px!important;border:1px solid rgba(226,239,235,.16)!important;border-radius:8px!important;color:#dce7e2!important;font-size:1rem!important}
-.stat-card{padding:18px 12px!important;border:0!important;border-top:1px solid rgba(226,239,235,.12)!important;border-radius:0!important;background:transparent!important;text-align:left!important;backdrop-filter:none!important}
-.stat-card .stat-number{color:#e8efec!important;font-size:1.65rem!important;letter-spacing:-.045em}
-.features-section,.how-it-works-section,.cta-section{background:#080b0d!important}
-.features-section,.how-it-works-section{border-top:1px solid rgba(226,239,235,.08)}
-.features-section h2,.how-it-works-section h2,.cta-section h2{font-size:clamp(1.8rem,3.5vw,2.8rem)!important;letter-spacing:-.045em!important;color:#e8efec!important}
-.features-section h2 span,.how-it-works-section h2 span,.cta-section h2 span{background:none!important;color:#36d4a5!important;-webkit-text-fill-color:currentColor!important}
-.feature-card>div,.timeline-item .premium-card{border:1px solid rgba(226,239,235,.1)!important;border-radius:12px!important;background:#0e1315!important;box-shadow:none!important;backdrop-filter:none!important}
-.feature-card:hover>div{transform:translateY(-2px);border-color:rgba(39,201,154,.28)!important}
-.feature-card>div>div:first-child{width:42px!important;height:42px!important;border-radius:9px!important;background:rgba(39,201,154,.09)!important}
-.feature-card>div>div:first-child>div{color:#50dcb3!important;font-size:1.2rem!important}
-.feature-card h3,.timeline-item h3{color:#e8efec!important}.feature-card p,.timeline-item p{color:#9ba9a4!important}
-.timeline-item>div>div:first-child{background:#27c99a!important;color:#06140f!important;width:44px!important;height:44px!important;font-size:1rem!important}
-.timeline-item:before{display:none!important}.cta-section{border-top:1px solid rgba(226,239,235,.08)}
-@media(max-width:640px){.hero-section{padding-top:3.5rem!important}.hero-title br{display:none}.hero-cta{align-items:stretch!important}.hero-cta>*{width:100%;justify-content:center}.stat-card{padding:14px 8px!important}}
+.landing-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+.hero-section {
+  background: radial-gradient(ellipse at 50% 0%, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+}
+
+.premium-card {
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.premium-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+.premium-button {
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+}
+
+.premium-button:hover {
+  box-shadow: 0 8px 25px rgba(6, 182, 212, 0.6);
+}
+
+.premium-button-outline:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.feature-card:hover .feature-icon {
+  transform: rotateY(180deg);
+}
+
+.stat-card {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+@media (max-width: 1024px) {
+  .timeline-item::before {
+    display: none;
+  }
+}
+
+/* Animation classes */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.animate-card {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.stagger-text {
+  overflow: hidden;
+}
+
+.stagger-char {
+  display: inline-block;
+}
 </style>
