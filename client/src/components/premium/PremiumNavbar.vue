@@ -203,11 +203,56 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.premium-navbar{background:rgba(8,11,13,.88)!important;border-bottom:1px solid rgba(226,239,235,.09);backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;box-shadow:none!important}
-.premium-navbar .h-16{height:68px!important}
-.premium-navbar .bg-gradient-to-r,.premium-navbar .bg-gradient-to-br{background-image:none!important}
-.premium-navbar .premium-cta-btn{min-height:40px;padding:0 17px!important;border-radius:8px!important;background:#27c99a!important;color:#06140f!important;box-shadow:none!important;transform:none!important}
-.premium-navbar .premium-cta-btn>div{display:none!important}.premium-navbar .premium-cta-btn:hover{background:#45d9ad!important}
-.premium-navbar .premium-nav-item{border-radius:7px!important}.premium-navbar .premium-nav-item:before{display:none!important}.premium-navbar .premium-nav-item:hover{background:rgba(255,255,255,.045)!important}
-.premium-navbar .premium-nav-item span:last-child{background:#27c99a!important}
+.premium-navbar {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.premium-nav-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.premium-nav-item:hover::before {
+  left: 100%;
+}
+
+.premium-cta-btn {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
+}
+
+.premium-cta-btn:hover {
+  box-shadow: 0 6px 25px rgba(6, 182, 212, 0.4);
+}
+
+.premium-cta-btn::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #06b6d4, #3b82f6, #06b6d4);
+  border-radius: 14px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.premium-cta-btn:hover::after {
+  opacity: 1;
+}
 </style>
