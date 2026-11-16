@@ -4,8 +4,8 @@
     :class="[
       'premium-navbar fixed top-0 left-0 right-0 z-50 transition-all duration-300',
       isScrolled || isMobileMenuOpen
-        ? 'bg-white/10 backdrop-blur-xl border-b border-white/10 shadow-xl'
-        : 'bg-transparent'
+        ? 'bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm'
+        : 'bg-white/80 backdrop-blur-sm border-b border-slate-100'
     ]"
     aria-label="Main navigation"
   >
@@ -17,23 +17,22 @@
             <!-- Animated Logo Container -->
             <div class="relative">
               <!-- Glow Effect -->
-              <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 opacity-20 blur-md group-hover:opacity-30 transition-opacity duration-500" />
+              <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-lime-400 to-green-400 opacity-0 blur-md group-hover:opacity-20 transition-opacity duration-500" />
               
               <!-- Logo Icon -->
-              <div class="relative flex items-center justify-center w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-white/10 shadow-lg group-hover:shadow-cyan-500/20 transition-all duration-500">
-        
-  <img src="/favicon.svg" alt="Site Scanner" class="w-6 h-6  brightness-400" />
+              <div class="relative flex items-center justify-center w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br from-lime-500 to-green-500 border border-lime-400 shadow-brand-sm group-hover:shadow-brand-md transition-all duration-500">
+                <img src="/favicon.svg" alt="Site Scanner" class="w-6 h-6 brightness-0 invert" />
                 <!-- Pulsing Dot -->
-                <div class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50" />
+                <div class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-400/50" />
               </div>
             </div>
             
             <!-- Brand Text -->
             <div class="flex flex-col">
-              <span class="text-white font-bold text-lg lg:text-xl tracking-tight bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+              <span class="text-slate-900 font-bold text-lg lg:text-xl tracking-tight">
                 Site Scanner
               </span>
-              <span class="text-xs text-gray-400 font-medium tracking-wide">
+              <span class="text-xs text-slate-500 font-medium tracking-wide">
                 Premium Analysis
               </span>
             </div>
@@ -50,15 +49,15 @@
             class="premium-nav-item relative px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300"
             :class="[
               $route.path === item.path
-                ? 'text-white bg-white/5'
-                : 'text-gray-300 hover:text-white hover:bg-white/5'
+                ? 'text-lime-700 bg-lime-50'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             ]"
           >
             <span>{{ item.name }}</span>
             <!-- Active Indicator -->
             <span
               v-if="$route.path === item.path"
-              class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
+              class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-lime-500 to-green-500 rounded-full"
             />
           </router-link>
         </div>
@@ -68,18 +67,16 @@
           <!-- Get Started Button -->
           <router-link
             to="/app"
-            class="premium-cta-btn hidden lg:flex items-center justify-center px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-300 transform hover:scale-105 active:scale-95"
+            class="premium-cta-btn hidden lg:flex items-center justify-center px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-300 transform hover:scale-105 active:scale-95 bg-gradient-to-r from-lime-500 to-green-500 hover:from-lime-400 hover:to-green-400 shadow-brand-sm hover:shadow-brand-md"
             aria-label="Get Started with Site Scanner"
           >
             <span class="relative z-10">Get Started</span>
-            <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 opacity-100 transition-opacity duration-300" />
-            <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 opacity-0 hover:opacity-100 transition-opacity duration-300" />
           </router-link>
 
           <!-- Mobile Menu Toggle -->
           <button
             @click="toggleMobileMenu"
-            class="lg:hidden relative w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300"
+            class="lg:hidden relative w-10 h-10 rounded-lg flex items-center justify-center bg-slate-100 border border-slate-200 hover:bg-slate-200 transition-all duration-300"
             :aria-expanded="isMobileMenuOpen"
             aria-label="Toggle mobile menu"
           >
@@ -87,19 +84,19 @@
             <div class="relative w-5 h-5">
               <span
                 :class="[
-                  'absolute left-0 w-5 h-0.5 bg-gray-300 transition-all duration-300',
+                  'absolute left-0 w-5 h-0.5 bg-slate-600 transition-all duration-300',
                   isMobileMenuOpen ? 'top-2 rotate-45' : 'top-1'
                 ]"
               />
               <span
                 :class="[
-                  'absolute left-0 w-5 h-0.5 bg-gray-300 transition-all duration-300',
+                  'absolute left-0 w-5 h-0.5 bg-slate-600 transition-all duration-300',
                   isMobileMenuOpen ? 'top-2 -rotate-45' : 'top-3'
                 ]"
               />
               <span
                 :class="[
-                  'absolute left-0 w-5 h-0.5 bg-gray-300 transition-all duration-300',
+                  'absolute left-0 w-5 h-0.5 bg-slate-600 transition-all duration-300',
                   isMobileMenuOpen ? 'top-2 opacity-0' : 'top-5'
                 ]"
               />
@@ -119,7 +116,7 @@
       >
         <div
           v-if="isMobileMenuOpen"
-          class="lg:hidden pt-4 pb-6 border-t border-white/10 mt-2"
+          class="lg:hidden pt-4 pb-6 border-t border-slate-100 mt-2"
         >
           <div class="space-y-2">
             <router-link
@@ -130,8 +127,8 @@
               class="block px-4 py-3 rounded-xl text-base font-medium transition-all duration-300"
               :class="[
                 $route.path === item.path
-                  ? 'text-white bg-white/5'
-                  : 'text-gray-300 hover:text-white hover:bg-white/5'
+                  ? 'text-lime-700 bg-lime-50'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               ]"
               :aria-label="item.name"
             >
@@ -142,7 +139,7 @@
             <router-link
               to="/app"
               @click="closeMobileMenu"
-              class="block mt-4 px-4 py-3 rounded-xl text-center text-base font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 transition-all duration-300"
+              class="block mt-4 px-4 py-3 rounded-xl text-center text-base font-semibold text-white bg-gradient-to-r from-lime-500 to-green-500 hover:from-lime-400 hover:to-green-400 transition-all duration-300 shadow-brand-sm"
               aria-label="Get Started with Site Scanner"
             >
               Get Started
@@ -220,7 +217,7 @@ onUnmounted(() => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(132, 204, 22, 0.08), transparent);
   transition: left 0.5s ease;
 }
 
@@ -231,11 +228,6 @@ onUnmounted(() => {
 .premium-cta-btn {
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
-}
-
-.premium-cta-btn:hover {
-  box-shadow: 0 6px 25px rgba(6, 182, 212, 0.4);
 }
 
 .premium-cta-btn::after {
@@ -245,7 +237,7 @@ onUnmounted(() => {
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, #06b6d4, #3b82f6, #06b6d4);
+  background: linear-gradient(45deg, #84cc16, #22c55e, #84cc16);
   border-radius: 14px;
   z-index: -1;
   opacity: 0;

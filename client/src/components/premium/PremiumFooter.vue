@@ -1,5 +1,5 @@
 <template>
-  <footer class="premium-footer bg-gradient-to-b from-gray-900 to-gray-950 border-t border-white/10 pt-12 pb-8">
+  <footer class="premium-footer bg-gradient-to-b from-slate-50 to-slate-100 border-t border-slate-200 pt-12 pb-8">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Main Footer Content -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -10,22 +10,22 @@
             <!-- Logo and Brand -->
             <div class="flex items-center space-x-3">
               <div class="relative">
-                <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 opacity-20 blur-md" />
-                <div class="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-white/10 shadow-lg">
-  <img src="/favicon.svg" alt="Site Scanner" class="w-6 h-6  brightness-400" />
+                <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-lime-400 to-green-400 opacity-20 blur-md" />
+                <div class="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-lime-500 to-green-500 border border-lime-400 shadow-brand-sm">
+                  <img src="/favicon.svg" alt="Site Scanner" class="w-6 h-6 brightness-0 invert" />
                 </div>
               </div>
               <div class="flex flex-col">
-                <span class="text-white font-bold text-xl tracking-tight bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+                <span class="text-slate-900 font-bold text-xl tracking-tight">
                   Site Scanner
                 </span>
-                <span class="text-sm text-gray-400 font-medium tracking-wide">
+                <span class="text-sm text-slate-500 font-medium tracking-wide">
                   Premium Website Analysis
                 </span>
               </div>
             </div>
 
-            <p class="text-gray-400 text-sm leading-relaxed max-w-md">
+            <p class="text-slate-500 text-sm leading-relaxed max-w-md">
               Advanced website analysis platform providing comprehensive insights into technologies, security, performance, and metadata. Professional-grade scanning for developers and security teams.
             </p>
 
@@ -37,7 +37,7 @@
                 :href="social.url"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300"
+                class="w-9 h-9 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-500 hover:text-lime-600 hover:bg-lime-50 hover:border-lime-300 transition-all duration-300"
                 :aria-label="social.name"
                 v-html="social.svg"
               ></a>
@@ -47,14 +47,14 @@
 
         <!-- Quick Links Column -->
         <div class="lg:col-span-2">
-          <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">
+          <h3 class="text-slate-800 font-semibold text-sm uppercase tracking-wider mb-4">
             Quick Links
           </h3>
           <ul class="space-y-3">
             <li v-for="link in quickLinks" :key="link.name">
               <router-link
                 :to="link.path"
-                class="text-gray-400 hover:text-white text-sm transition-colors duration-300 flex items-center group"
+                class="text-slate-500 hover:text-lime-600 text-sm transition-colors duration-300 flex items-center group"
               >
                 <span class="group-hover:translate-x-1 transition-transform duration-300">{{ link.name }}</span>
               </router-link>
@@ -64,13 +64,13 @@
 
         <!-- Platform Column -->
         <div class="lg:col-span-3">
-          <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">
+          <h3 class="text-slate-800 font-semibold text-sm uppercase tracking-wider mb-4">
             Platform
           </h3>
           <ul class="space-y-3">
             <li v-for="feature in platformFeatures" :key="feature">
-              <span class="text-gray-400 text-sm flex items-center">
-                <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 mr-2"></span>
+              <span class="text-slate-500 text-sm flex items-center">
+                <span class="w-1.5 h-1.5 rounded-full bg-lime-500 mr-2"></span>
                 {{ feature }}
               </span>
             </li>
@@ -79,13 +79,13 @@
 
         <!-- Tools Column -->
         <div class="lg:col-span-3">
-          <h3 class="text-white font-semibold text-sm uppercase tracking-wider mb-4">
+          <h3 class="text-slate-800 font-semibold text-sm uppercase tracking-wider mb-4">
             Tools
           </h3>
           <ul class="space-y-3">
             <li v-for="tool in tools" :key="tool">
-              <span class="text-gray-400 text-sm flex items-center">
-                <span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-2"></span>
+              <span class="text-slate-500 text-sm flex items-center">
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-2"></span>
                 {{ tool }}
               </span>
             </li>
@@ -94,12 +94,12 @@
       </div>
 
       <!-- Divider -->
-      <div class="my-8 lg:my-12 border-t border-white/10"></div>
+      <div class="my-8 lg:my-12 border-t border-slate-200"></div>
 
       <!-- Bottom Footer -->
       <div class="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
         <!-- Copyright -->
-        <div class="text-gray-500 text-sm">
+        <div class="text-slate-400 text-sm">
           &copy; {{ currentYear }} Site Scanner. All rights reserved.
         </div>
 
@@ -109,7 +109,7 @@
             v-for="legal in legalLinks"
             :key="legal.name"
             :to="legal.path"
-            class="text-gray-500 hover:text-gray-300 text-sm transition-colors duration-300"
+            class="text-slate-400 hover:text-slate-600 text-sm transition-colors duration-300"
           >
             {{ legal.name }}
           </router-link>
@@ -118,7 +118,7 @@
         <!-- Back to Top -->
         <button
           @click="scrollToTop"
-          class="lg:hidden w-full lg:w-auto px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-300 flex items-center justify-center lg:justify-start space-x-2"
+          class="lg:hidden w-full lg:w-auto px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-lime-700 bg-white hover:bg-lime-50 border border-slate-200 hover:border-lime-300 transition-all duration-300 flex items-center justify-center space-x-2"
           aria-label="Back to top"
         >
           <span>Back to Top</span>
@@ -131,7 +131,7 @@
       <!-- Desktop Back to Top -->
       <button
         @click="scrollToTop"
-        class="hidden lg:fixed lg:bottom-8 lg:right-8 lg:flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg hover:shadow-xl hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 z-40"
+        class="hidden lg:fixed lg:bottom-8 lg:right-8 lg:flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r from-lime-500 to-green-500 text-white shadow-brand-sm hover:shadow-brand-md hover:from-lime-400 hover:to-green-400 transition-all duration-300 z-40"
         aria-label="Back to top"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,46 +237,11 @@ const scrollToTop = () => {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.5), transparent);
-}
-
-.premium-footer::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(132, 204, 22, 0.4), transparent);
 }
 
 /* Hover effects for links */
 .premium-footer a:hover {
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-}
-
-/* Social icon hover effects */
-.premium-footer a[aria-label^="Git"]:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-}
-
-.premium-footer a[aria-label^="Twit"]:hover {
-  color: #1da1f2;
-  background: rgba(29, 161, 242, 0.1);
-  box-shadow: 0 0 15px rgba(29, 161, 242, 0.2);
-}
-
-.premium-footer a[aria-label^="Link"]:hover {
-  color: #0077b5;
-  background: rgba(0, 119, 181, 0.1);
-  box-shadow: 0 0 15px rgba(0, 119, 181, 0.2);
-}
-
-.premium-footer a[aria-label^="Web"]:hover {
-  color: #06b6d4;
-  background: rgba(6, 182, 212, 0.1);
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+  text-shadow: none;
 }
 </style>

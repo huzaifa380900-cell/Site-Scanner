@@ -98,8 +98,6 @@ async function startScan(url) {
 }
 
 async function selectReport(id) {
-  // Set the tab before awaiting the request so a later user click is not
-  // overwritten when the report arrives.
   activeTab.value = 'findings'
   await openReport(id)
   await nextTick()
@@ -108,7 +106,7 @@ async function selectReport(id) {
 </script>
 
 <template>
-  <div class="min-h-screen pt-16 lg:pt-20">
+  <div class="min-h-screen bg-slate-50 pt-16 lg:pt-20">
     <PremiumNavbar />
 
     <main class="mx-auto grid max-w-7xl gap-6 px-4 pb-16 pt-6 sm:px-6 sm:pt-8 xl:grid-cols-[minmax(0,1fr)_336px]">
@@ -117,18 +115,18 @@ async function selectReport(id) {
 
         <div
           v-if="scanError"
-          class="flex items-start gap-3 rounded-xl border border-rose-400/25 bg-rose-500/10 p-4 text-rose-100"
+          class="flex items-start gap-3 rounded-xl border border-rose-300 bg-rose-50 p-4 text-rose-800"
           role="alert"
         >
-          <CircleAlert :size="18" class="mt-0.5 shrink-0 text-rose-300" />
+          <CircleAlert :size="18" class="mt-0.5 shrink-0 text-rose-500" />
           <div class="min-w-0 flex-1">
             <p class="text-sm font-medium">{{ scanError.message }}</p>
-            <p class="mt-1 text-[11px] text-rose-200/70">
+            <p class="mt-1 text-[11px] text-rose-600/80">
               Error code <span class="font-mono">{{ scanError.code }}</span>
               <span v-if="scanError.status"> · HTTP {{ scanError.status }}</span>
             </p>
-            <p v-if="errorHint" class="mt-1.5 text-[11px] leading-relaxed text-rose-200/80">{{ errorHint }}</p>
-            <ul v-if="scanError.details?.length" class="mt-1.5 list-inside list-disc text-[11px] text-rose-200/80">
+            <p v-if="errorHint" class="mt-1.5 text-[11px] leading-relaxed text-rose-600/80">{{ errorHint }}</p>
+            <ul v-if="scanError.details?.length" class="mt-1.5 list-inside list-disc text-[11px] text-rose-600/80">
               <li v-for="(detail, index) in scanError.details" :key="index">
                 {{ detail.field }}: {{ detail.message }}
               </li>
@@ -136,7 +134,7 @@ async function selectReport(id) {
           </div>
           <button
             type="button"
-            class="btn btn-ghost btn-xs h-7 min-h-0 shrink-0 text-rose-200 hover:bg-rose-500/10"
+            class="btn btn-ghost btn-xs h-7 min-h-0 shrink-0 text-rose-500 hover:bg-rose-100"
             aria-label="Dismiss error"
             @click="clearScanError"
           >
@@ -151,7 +149,7 @@ async function selectReport(id) {
             <OverviewCards :report="selectedReport" @export="exportReport" />
 
             <section class="panel overflow-hidden">
-              <div class="flex items-center gap-1 overflow-x-auto border-b border-white/[0.06] px-2 pt-2 sm:px-3">
+              <div class="flex items-center gap-1 overflow-x-auto border-b border-slate-100 px-2 pt-2 sm:px-3">
                 <button
                   v-for="tab in tabs"
                   :key="tab.id"
@@ -160,15 +158,15 @@ async function selectReport(id) {
                   :aria-selected="activeTab === tab.id"
                   class="relative flex shrink-0 items-center gap-1.5 rounded-t-lg px-3 py-2.5 text-xs font-medium transition-colors"
                   :class="activeTab === tab.id
-                    ? 'bg-white/[0.03] text-white after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-full after:bg-cyan-400'
-                    : 'text-slate-400 hover:bg-white/[0.02] hover:text-slate-200'"
+                    ? 'bg-lime-50 text-lime-700 after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-full after:bg-lime-500'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
                   @click="activeTab = tab.id"
                 >
                   {{ tab.label }}
                   <span
                     v-if="tab.count"
                     class="rounded px-1.5 py-0.5 text-[10px] tabular"
-                    :class="activeTab === tab.id ? 'bg-cyan-400/15 text-cyan-200' : 'bg-white/[0.05] text-slate-400'"
+                    :class="activeTab === tab.id ? 'bg-lime-100 text-lime-700' : 'bg-slate-100 text-slate-500'"
                   >
                     {{ tab.count }}
                   </span>
@@ -188,13 +186,13 @@ async function selectReport(id) {
         <section v-else class="panel overflow-hidden">
           <div class="panel-body">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
-              <span class="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-cyan-400/20 bg-cyan-400/10">
-                <ScanSearch :size="24" class="text-cyan-300" />
+              <span class="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-lime-300 bg-lime-50">
+                <ScanSearch :size="24" class="text-lime-600" />
               </span>
               <div class="min-w-0">
                 <p class="eyebrow">Waiting for a target</p>
-                <h2 class="mt-1 text-lg font-semibold tracking-tight text-white">Start with a public website</h2>
-                <p class="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-400">
+                <h2 class="mt-1 text-lg font-semibold tracking-tight text-slate-900">Start with a public website</h2>
+                <p class="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-500">
                   Site Scanner performs a passive, bounded analysis: it fetches the page, parses the HTML, fingerprints
                   publicly visible technologies and loads the site once in headless Chromium. Every observation is real
                   scan data — nothing is mocked.
@@ -202,13 +200,13 @@ async function selectReport(id) {
                 <div class="mt-4 flex flex-wrap gap-2">
                   <button
                     type="button"
-                    class="btn btn-sm h-9 min-h-0 gap-2 border-white/10 bg-white/[0.03] text-slate-200 hover:bg-white/[0.06]"
+                    class="btn btn-sm h-9 min-h-0 gap-2 border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300"
                     @click="startScan('https://example.com')"
                   >
                     <Globe :size="14" />
                     Scan example.com
                   </button>
-                  <span class="inline-flex items-center gap-1.5 px-2 text-[11px] text-slate-500">
+                  <span class="inline-flex items-center gap-1.5 px-2 text-[11px] text-slate-400">
                     <ShieldCheck :size="13" />
                     Private and internal addresses are rejected server-side.
                   </span>
@@ -217,33 +215,33 @@ async function selectReport(id) {
             </div>
 
             <div class="mt-6 grid gap-3 sm:grid-cols-3">
-              <div class="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                <Globe :size="17" class="text-cyan-300" />
-                <h3 class="mt-2 text-sm font-medium text-slate-200">HTTP &amp; security</h3>
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 hover:border-lime-300 hover:bg-lime-50 transition-colors duration-200">
+                <Globe :size="17" class="text-lime-600" />
+                <h3 class="mt-2 text-sm font-medium text-slate-800">HTTP &amp; security</h3>
                 <p class="mt-1 text-xs leading-relaxed text-slate-500">
                   Status, redirects, headers, HTTPS and framing/CSP observations.
                 </p>
               </div>
-              <div class="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                <Cpu :size="17" class="text-cyan-300" />
-                <h3 class="mt-2 text-sm font-medium text-slate-200">Technology fingerprints</h3>
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 hover:border-lime-300 hover:bg-lime-50 transition-colors duration-200">
+                <Cpu :size="17" class="text-lime-600" />
+                <h3 class="mt-2 text-sm font-medium text-slate-800">Technology fingerprints</h3>
                 <p class="mt-1 text-xs leading-relaxed text-slate-500">
                   Frameworks, CMS, analytics, UI libraries and infrastructure — with evidence.
                 </p>
               </div>
-              <div class="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                <Bug :size="17" class="text-cyan-300" />
-                <h3 class="mt-2 text-sm font-medium text-slate-200">Browser behaviour</h3>
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 hover:border-lime-300 hover:bg-lime-50 transition-colors duration-200">
+                <Bug :size="17" class="text-lime-600" />
+                <h3 class="mt-2 text-sm font-medium text-slate-800">Browser behaviour</h3>
                 <p class="mt-1 text-xs leading-relaxed text-slate-500">
                   Console errors, uncaught exceptions and failed resources in Chromium.
                 </p>
               </div>
             </div>
 
-            <div class="mt-4 flex items-start gap-2 rounded-lg border border-white/[0.05] bg-[#070d19]/60 p-3 text-[11px] leading-relaxed text-slate-500">
-              <Sparkles :size="13" class="mt-0.5 shrink-0 text-slate-500" />
+            <div class="mt-4 flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500">
+              <Sparkles :size="13" class="mt-0.5 shrink-0 text-slate-400" />
               <span>
-                No scan starts until you click <span class="text-slate-300">Scan Website</span>. The overall observation
+                No scan starts until you click <span class="text-slate-700 font-medium">Scan Website</span>. The overall observation
                 score is a heuristic health indicator, not a security certification.
               </span>
             </div>
@@ -268,7 +266,7 @@ async function selectReport(id) {
         <section class="panel p-4">
           <div class="flex items-center gap-2">
             <Database :size="14" class="text-slate-400" />
-            <h2 class="text-sm font-medium text-slate-200">How the score works</h2>
+            <h2 class="text-sm font-medium text-slate-800">How the score works</h2>
           </div>
           <p class="mt-2 text-[11px] leading-relaxed text-slate-500">
             Starts at 100 and deducts per finding: critical −30, high −15, medium −8, low −3, info 0. The floor is 0.
@@ -282,7 +280,7 @@ async function selectReport(id) {
         <section class="panel p-4">
           <div class="flex items-center gap-2">
             <ShieldCheck :size="14" class="text-slate-400" />
-            <h2 class="text-sm font-medium text-slate-200">Safe by design</h2>
+            <h2 class="text-sm font-medium text-slate-800">Safe by design</h2>
           </div>
           <ul class="mt-2 space-y-1.5 text-[11px] leading-relaxed text-slate-500">
             <li>• Only public HTTP/HTTPS targets are accepted.</li>
@@ -295,10 +293,10 @@ async function selectReport(id) {
       </aside>
     </main>
 
-    <footer class="border-t border-white/[0.06] py-6">
-      <div class="mx-auto max-w-7xl px-4 text-center text-[11px] leading-relaxed text-slate-600 sm:px-6">
+    <footer class="border-t border-slate-200 bg-white py-6">
+      <div class="mx-auto max-w-7xl px-4 text-center text-[11px] leading-relaxed text-slate-400 sm:px-6">
         <p>
-          <span class="text-slate-400">Site Scanner</span> · Website Analysis &amp; Intelligence · Passive analysis of
+          <span class="text-slate-600">Site Scanner</span> · Website Analysis &amp; Intelligence · Passive analysis of
           public websites.
         </p>
         <p class="mt-1">

@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   html {
@@ -13,44 +13,56 @@
   }
 
   body {
-    @apply min-h-screen bg-[#070d19] text-slate-200 antialiased;
+    @apply min-h-screen bg-white text-slate-900 antialiased;
     background-image:
-      radial-gradient(60rem 30rem at 12% -12%, rgba(34, 211, 238, 0.09), transparent 62%),
-      radial-gradient(48rem 26rem at 92% -6%, rgba(56, 189, 248, 0.06), transparent 58%);
+      radial-gradient(60rem 30rem at 12% -12%, rgba(132, 204, 22, 0.08), transparent 62%),
+      radial-gradient(48rem 26rem at 92% -6%, rgba(163, 230, 53, 0.06), transparent 58%);
     background-repeat: no-repeat;
     background-attachment: fixed;
     overflow-x: clip;
   }
 
   ::selection {
-    background: rgba(34, 211, 238, 0.28);
-    color: #f8fafc;
+    background: rgba(132, 204, 22, 0.25);
+    color: #1a2e05;
   }
 
   :focus-visible {
-    outline: 2px solid rgba(34, 211, 238, 0.75);
+    outline: 2px solid rgba(132, 204, 22, 0.75);
     outline-offset: 2px;
   }
 
   * {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
   }
 
   *::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
   }
 }
 
 @layer components {
   .panel {
-    @apply rounded-2xl border border-white/[0.07] bg-[#0b1220]/90 shadow-card;
+    @apply rounded-2xl border border-slate-200 bg-white shadow-card;
   }
 
   .panel-head {
-    @apply flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-5 py-4 sm:px-6;
+    @apply flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 sm:px-6;
   }
 
   .panel-body {
@@ -62,15 +74,15 @@
   }
 
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[11px] text-slate-300;
+    @apply inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] text-slate-600;
   }
 
   .code-block {
-    @apply max-h-56 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-white/[0.06] bg-[#070d19] p-3 font-mono text-[12px] leading-relaxed text-slate-300;
+    @apply max-h-56 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-slate-200 bg-slate-50 p-3 font-mono text-[12px] leading-relaxed text-slate-700;
   }
 
   .linkish {
-    @apply text-cyan-300 underline decoration-cyan-400/30 underline-offset-2 transition-colors hover:decoration-cyan-300;
+    @apply text-lime-600 underline decoration-lime-400/40 underline-offset-2 transition-colors hover:decoration-lime-500;
   }
 
   .tabular {
@@ -83,7 +95,7 @@
 @layer components {
   /* Premium Cards */
   .premium-card {
-    @apply rounded-2xl border border-white/[0.1] bg-gradient-to-br from-gray-900/50 to-gray-800/30 backdrop-blur-sm shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-cyan-500/30;
+    @apply rounded-2xl border border-slate-200 bg-white shadow-card transition-all duration-300 hover:shadow-md hover:border-lime-300;
   }
 
   /* Premium Buttons */
@@ -92,7 +104,7 @@
   }
 
   .premium-button-outline {
-    @apply border-2 border-white/10 rounded-xl font-semibold text-gray-300 transition-all duration-300 hover:border-white/20 hover:text-white hover:bg-white/5;
+    @apply border-2 border-slate-200 rounded-xl font-semibold text-slate-700 transition-all duration-300 hover:border-lime-400 hover:text-lime-700 hover:bg-lime-50;
   }
 
   /* Premium Sections */
@@ -102,17 +114,17 @@
 
   /* Gradient Text */
   .gradient-text {
-    @apply bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-lime-600 to-green-500 bg-clip-text text-transparent;
   }
 
   /* Glass Effect */
   .glass-effect {
-    @apply backdrop-blur-xl bg-white/10 border border-white/20;
+    @apply backdrop-blur-xl bg-white/80 border border-slate-200;
   }
 
   /* Animated Background */
   .animated-bg {
-    background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #1e293b);
+    background: linear-gradient(-45deg, #f8fafc, #f0fdf4, #f8fafc, #ecfccb);
     background-size: 400% 400%;
     animation: gradientBG 15s ease infinite;
   }
@@ -135,7 +147,7 @@
 
   /* Shimmer Effect */
   .shimmer {
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, rgba(132, 204, 22, 0.15), transparent);
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
   }
@@ -173,10 +185,10 @@
   }
 }
 
-/* Dark mode optimizations */
-@media (prefers-color-scheme: dark) {
-  .dark-optimized {
-    @apply bg-gray-900 text-gray-100;
+/* Light mode optimizations */
+@media (prefers-color-scheme: light) {
+  .light-optimized {
+    @apply bg-white text-slate-900;
   }
 }
 

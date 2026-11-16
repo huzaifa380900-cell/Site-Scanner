@@ -25,7 +25,6 @@ import { initAnimations } from './utils/premiumAnimations.js'
 const route = useRoute()
 
 onMounted(() => {
-  // Initialize premium animations
   initAnimations()
 })
 </script>
@@ -45,13 +44,13 @@ onMounted(() => {
 
 /* Selection styling */
 ::selection {
-  background: rgba(14, 165, 233, 0.3);
-  color: #f8fafc;
+  background: rgba(132, 204, 22, 0.25);
+  color: #1a2e05;
 }
 
 /* Focus styling */
 :focus-visible {
-  outline: 2px solid rgba(14, 165, 233, 0.5);
+  outline: 2px solid rgba(132, 204, 22, 0.6);
   outline-offset: 2px;
   border-radius: 4px;
 }

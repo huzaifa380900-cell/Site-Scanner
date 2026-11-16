@@ -6,16 +6,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: {
-          950: '#070d19',
-          900: '#0b1220',
-          800: '#101a2e',
-          700: '#16213a',
-          600: '#1e2c4a',
-        },
-        cyan: {
-          400: '#22d3ee',
-          500: '#06b6d4',
+        brand: {
+          50: '#f7fee7',
+          100: '#ecfccb',
+          200: '#d9f99d',
+          300: '#bef264',
+          400: '#a3e635',
+          500: '#84cc16',
+          600: '#65a30d',
+          700: '#4d7c0f',
+          800: '#3f6212',
+          900: '#365314',
         },
       },
       fontFamily: {
@@ -33,7 +34,10 @@ export default {
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
       },
       boxShadow: {
-        card: '0 1px 2px rgba(2, 8, 20, 0.4), 0 12px 32px -20px rgba(2, 8, 20, 0.9)',
+        card: '0 1px 3px rgba(0, 0, 0, 0.08), 0 8px 24px -8px rgba(0, 0, 0, 0.12)',
+        'brand-sm': '0 2px 8px rgba(132, 204, 22, 0.3)',
+        'brand-md': '0 4px 16px rgba(132, 204, 22, 0.35)',
+        'brand-lg': '0 8px 32px rgba(132, 204, 22, 0.4)',
       },
       keyframes: {
         'fade-up': {
@@ -55,22 +59,22 @@ export default {
     themes: [
       {
         sitescanner: {
-          primary: '#22d3ee',
-          'primary-content': '#04131c',
-          secondary: '#38bdf8',
-          'secondary-content': '#04131c',
-          accent: '#818cf8',
-          'accent-content': '#0a0f1f',
-          neutral: '#1c2942',
-          'neutral-content': '#dbe7f5',
-          'base-100': '#0b1220',
-          'base-200': '#0e1729',
-          'base-300': '#16213a',
-          'base-content': '#dbe7f5',
-          info: '#38bdf8',
-          success: '#34d399',
-          warning: '#fbbf24',
-          error: '#f87171',
+          primary: '#84cc16',
+          'primary-content': '#1a2e05',
+          secondary: '#65a30d',
+          'secondary-content': '#1a2e05',
+          accent: '#a3e635',
+          'accent-content': '#1a2e05',
+          neutral: '#f1f5f9',
+          'neutral-content': '#0f172a',
+          'base-100': '#ffffff',
+          'base-200': '#f8fafc',
+          'base-300': '#f1f5f9',
+          'base-content': '#0f172a',
+          info: '#0ea5e9',
+          success: '#22c55e',
+          warning: '#f59e0b',
+          error: '#ef4444',
           '--rounded-box': '0.9rem',
           '--rounded-btn': '0.6rem',
           '--rounded-badge': '0.4rem',
