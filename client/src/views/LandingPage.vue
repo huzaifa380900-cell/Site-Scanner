@@ -20,11 +20,11 @@
           <!-- Main Heading -->
           <h1 class="hero-title text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-6">
             <span class="bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
-              Advanced Website
+              Understand Any Website
             </span>
             <br>
             <span class="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Analysis & Intelligence
+              Security & Technology
             </span>
           </h1>
 
@@ -57,24 +57,10 @@
             </button>
           </div>
 
-          <!-- Stats -->
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 max-w-3xl mx-auto">
-            <div class="stat-card text-center">
-              <div class="text-3xl lg:text-4xl font-bold text-white mb-2 stat-number">100%</div>
-              <div class="text-sm text-gray-400">Real-time Analysis</div>
-            </div>
-            <div class="stat-card text-center">
-              <div class="text-3xl lg:text-4xl font-bold text-white mb-2 stat-number">50+</div>
-              <div class="text-sm text-gray-400">Technologies Detected</div>
-            </div>
-            <div class="stat-card text-center">
-              <div class="text-3xl lg:text-4xl font-bold text-white mb-2 stat-number">∞</div>
-              <div class="text-sm text-gray-400">Unlimited Scans</div>
-            </div>
-            <div class="stat-card text-center">
-              <div class="text-3xl lg:text-4xl font-bold text-white mb-2 stat-number">24/7</div>
-              <div class="text-sm text-gray-400">Platform Availability</div>
-            </div>
+          <div class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/10 pt-5 text-xs text-gray-400">
+            <span>Passive website analysis</span>
+            <span>Publicly observable signals</span>
+            <span>No exploitation or intrusive testing</span>
           </div>
         </div>
       </div>
